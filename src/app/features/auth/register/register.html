@@ -1,0 +1,76 @@
+<div class="d-flex align-items-center justify-content-center min-vh-100 bg-light-subtle px-3 py-5">
+  <div class="ed-card p-4 p-md-5" style="max-width: 460px; width: 100%;">
+    <h1 class="h3 fw-bold text-primary mb-1">Créer un compte</h1>
+    <p class="text-secondary mb-4">Rejoins Eventdrink en tant que client ou dépôt.</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="mb-3">
+        <label class="form-label d-block">Je m'inscris en tant que</label>
+        <div class="btn-group w-100" role="group">
+          <input
+            type="radio"
+            class="btn-check"
+            id="role-client"
+            [value]="Role.CLIENT"
+            formControlName="role"
+          />
+          <label class="btn btn-outline-primary" for="role-client">Client</label>
+
+          <input
+            type="radio"
+            class="btn-check"
+            id="role-depot"
+            [value]="Role.DEPOT"
+            formControlName="role"
+          />
+          <label class="btn btn-outline-primary" for="role-depot">Dépôt</label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="nom" class="form-label">Nom {{ form.value.role === Role.DEPOT ? 'du commerce' : 'complet' }}</label>
+        <input id="nom" type="text" class="form-control" formControlName="nom" />
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input id="email" type="email" class="form-control" formControlName="email" autocomplete="email" />
+      </div>
+
+      <div class="mb-3">
+        <label for="telephone" class="form-label">Téléphone</label>
+        <input id="telephone" type="tel" class="form-control" formControlName="telephone" />
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Mot de passe</label>
+        <input
+          id="password"
+          type="password"
+          class="form-control"
+          formControlName="password"
+          autocomplete="new-password"
+        />
+        @if (form.controls.password.invalid && form.controls.password.touched) {
+          <div class="form-text text-danger">8 caractères minimum.</div>
+        }
+      </div>
+
+      @if (error()) {
+        <div class="alert alert-danger py-2" role="alert">{{ error() }}</div>
+      }
+
+      <button type="submit" class="btn btn-primary w-100" [disabled]="loading()">
+        @if (loading()) {
+          <span class="spinner-border spinner-border-sm me-2"></span>
+        }
+        Créer mon compte
+      </button>
+    </form>
+
+    <p class="text-center text-secondary mt-4 mb-0">
+      Déjà un compte ?
+      <a routerLink="/auth/login">Se connecter</a>
+    </p>
+  </div>
+</div>
