@@ -48,3 +48,6 @@ backend/node_modules
 backend/dist
 backend/.env
 backend/generated
+
+# Claude Code (config locale, pas partagee)
+.claude/
