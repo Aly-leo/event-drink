@@ -14,10 +14,11 @@ export const routes: Routes = [
       import('./shared/components/coming-soon/coming-soon').then((m) => m.ComingSoon),
   },
   {
+  
     path: 'depot',
     canActivate: [roleGuard(Role.DEPOT)],
     loadComponent: () =>
-      import('./shared/components/coming-soon/coming-soon').then((m) => m.ComingSoon),
+      import('./features/depot/depot-inscription/depot-inscription').then((m) => m.DepotInscription),
   },
   {
     path: 'admin',

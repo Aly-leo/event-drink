@@ -1,10 +1,9 @@
 import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { DepotInscription } from './features/depot/depot-inscription/depot-inscription';
+import { ListeDepots } from "./features/client/pages/liste-depots/liste-depots";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet,DepotInscription],
+  imports: [ListeDepots],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

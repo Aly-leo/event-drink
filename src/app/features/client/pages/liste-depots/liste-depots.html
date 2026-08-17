@@ -1,0 +1,10 @@
+<div class="liste-depots">
+  <h2>Dépôts disponibles</h2>
+  <div id="carte" style="height: 400px;"></div>
+
+  <ul>
+    @for (depot of depots; track depot.id) {
+      <li>{{ depot.nom }} — {{ depot.adresse }}</li>
+    }
+  </ul>
+</div>

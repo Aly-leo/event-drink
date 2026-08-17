@@ -18,6 +18,16 @@
         <span class="error">L'adresse est requise</span>
       }
     </div>
+    
+
+    <div class="form-group">
+      <button type="button" (click)="localiser()">📍 Utiliser ma position actuelle</button>
+      @if (inscriptionForm.get('latitude')?.value) {
+        <p>Position captée : {{ inscriptionForm.get('latitude')?.value }}, {{ inscriptionForm.get('longitude')?.value }}</p>
+      }
+    </div>
+
+    <button type="submit" [disabled]="inscriptionForm.invalid">Enregistrer</button>
 
     <button type="submit" [disabled]="inscriptionForm.invalid">Enregistrer</button>
 
