@@ -1,0 +1,25 @@
+<div class="depot-inscription">
+  <h2>Inscription d'un dépôt</h2>
+
+  <form [formGroup]="inscriptionForm" (ngSubmit)="onSubmit()">
+
+    <div class="form-group">
+      <label for="nomDepot">Nom du dépôt</label>
+      <input id="nomDepot" type="text" formControlName="nomDepot" placeholder="Ex: Dépôt Bonamoussadi">
+      @if (inscriptionForm.get('nomDepot')?.invalid && inscriptionForm.get('nomDepot')?.touched) {
+        <span class="error">Le nom du dépôt est requis</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="adresse">Adresse</label>
+      <input id="adresse" type="text" formControlName="adresse" placeholder="Ex: Rue 123, Douala">
+      @if (inscriptionForm.get('adresse')?.invalid && inscriptionForm.get('adresse')?.touched) {
+        <span class="error">L'adresse est requise</span>
+      }
+    </div>
+
+    <button type="submit" [disabled]="inscriptionForm.invalid">Enregistrer</button>
+
+  </form>
+</div>
