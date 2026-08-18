@@ -1,35 +1,81 @@
-<div class="depot-inscription">
-  <h2>Inscription d'un dépôt</h2>
+<div class="page-inscription">
+  <div class="entete">
+    <h1>Configuration de votre Dépôt</h1>
+    <p>Complétez ces informations pour commencer à recevoir des commandes</p>
+  </div>
 
   <form [formGroup]="inscriptionForm" (ngSubmit)="onSubmit()">
 
-    <div class="form-group">
-      <label for="nomDepot">Nom du dépôt</label>
-      <input id="nomDepot" type="text" formControlName="nomDepot" placeholder="Ex: Dépôt Bonamoussadi">
-      @if (inscriptionForm.get('nomDepot')?.invalid && inscriptionForm.get('nomDepot')?.touched) {
-        <span class="error">Le nom du dépôt est requis</span>
-      }
+    <section class="carte-section">
+      <h2>🏬 Informations du Dépôt</h2>
+      <div class="grille-2">
+        <div class="champ">
+          <label>Nom du Dépôt</label>
+          <input type="text" formControlName="nomDepot" placeholder="Ex: Dépôt Central Akwa">
+        </div>
+        <div class="champ">
+          <label>Numéro de Téléphone</label>
+          <input type="text" formControlName="telephone" placeholder="+237 XXX XXX XXX">
+        </div>
+      </div>
+    </section>
+
+    <section class="carte-section">
+      <h2>📍 Localisation</h2>
+      <p class="sous-texte">Déplacez le marqueur ou cliquez sur la carte pour ajuster la position exacte.</p>
+      <div id="carte-localisation"></div>
+      <button type="button" class="btn-localiser" (click)="localiser()">📍 Utiliser ma position actuelle</button>
+    </section>
+
+    <section class="carte-section">
+      <h2>🚚 Services & Livraison</h2>
+      <div class="toggle-ligne">
+        <div>
+          <strong>Retrait sur place</strong>
+          <p>Les clients viennent récupérer leurs commandes.</p>
+        </div>
+        <label class="switch">
+          <input type="checkbox" formControlName="retraitSurPlace">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-ligne">
+        <div>
+          <strong>Livraison à domicile</strong>
+          <p>Vous proposez la livraison aux clients.</p>
+        </div>
+        <label class="switch">
+          <input type="checkbox" formControlName="livraisonADomicile">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="champ">
+        <label>Frais de livraison personnalisés (Base)</label>
+        <div class="input-suffixe">
+          <input type="number" formControlName="fraisLivraison">
+          <span>FCFA</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="carte-section">
+      <h2>🛡️ Documents de vérification</h2>
+      <p class="sous-texte">Veuillez fournir un Registre de commerce ou un NIU valide.</p>
+      <div class="zone-depot" (drop)="onFichierDepose($event)" (dragover)="$event.preventDefault()">
+        <input type="file" id="fichier" (change)="onFichierSelectionne($event)" accept=".pdf,.jpg,.png" hidden>
+        <label for="fichier">
+          @if (fichierJustificatif) {
+            <p>📄 {{ fichierJustificatif.name }}</p>
+          } @else {
+            <p>Glissez-déposez vos fichiers ici<br><small>ou cliquez pour parcourir (PDF, JPG, PNG)</small></p>
+          }
+        </label>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button type="button" class="btn-secondaire">Enregistrer comme brouillon</button>
+      <button type="submit" class="btn-principal" [disabled]="inscriptionForm.invalid">Terminer la configuration →</button>
     </div>
-
-    <div class="form-group">
-      <label for="adresse">Adresse</label>
-      <input id="adresse" type="text" formControlName="adresse" placeholder="Ex: Rue 123, Douala">
-      @if (inscriptionForm.get('adresse')?.invalid && inscriptionForm.get('adresse')?.touched) {
-        <span class="error">L'adresse est requise</span>
-      }
-    </div>
-    
-
-    <div class="form-group">
-      <button type="button" (click)="localiser()">📍 Utiliser ma position actuelle</button>
-      @if (inscriptionForm.get('latitude')?.value) {
-        <p>Position captée : {{ inscriptionForm.get('latitude')?.value }}, {{ inscriptionForm.get('longitude')?.value }}</p>
-      }
-    </div>
-
-    <button type="submit" [disabled]="inscriptionForm.invalid">Enregistrer</button>
-
-    <button type="submit" [disabled]="inscriptionForm.invalid">Enregistrer</button>
-
   </form>
 </div>

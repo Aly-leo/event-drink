@@ -1,10 +1,68 @@
-<div class="liste-depots">
-  <h2>Dépôts disponibles</h2>
-  <div id="carte" style="height: 400px;"></div>
+<header class="entete-app">
+  <div class="entete-gauche">
+    <span class="logo">🍹 EventDrink</span>
+    <div class="livraison-info">
+      <span class="label">Livraison à</span>
+      <span class="lieu">📍 Douala, Akwa ▾</span>
+    </div>
+  </div>
 
-  <ul>
-    @for (depot of depots; track depot.id) {
-      <li>{{ depot.nom }} — {{ depot.adresse }}</li>
-    }
-  </ul>
+  <div class="entete-recherche">
+    <input type="text" placeholder="🔍 Rechercher une boisson ou un dépôt...">
+  </div>
+
+  <div class="entete-droite">
+    <button class="icone-panier">🛒</button>
+    <div class="avatar">CM</div>
+  </div>
+</header>
+
+<div class="liste-depots">
+  ...
+<div class="liste-depots">
+  <div class="panneau-gauche">
+    <h2>Dépôts près de vous</h2>
+<p style="color:#999; font-size:0.9rem; margin-top:-0.8rem; margin-bottom:1.2rem;">
+  {{ depotsFiltres.length }} dépôt(s) trouvé(s)
+</p>
+
+    <div class="chips">
+      @for (cat of categories; track cat) {
+        <button type="button" [class.active]="categorieActive === cat" (click)="choisirCategorie(cat)">{{ cat }}</button>
+      }
+    </div>
+
+    <div class="filtres">
+      <button type="button" (click)="localiserUtilisateur()">📍 Me localiser</button>
+      <label>Rayon (km) : <input type="number" [(ngModel)]="rayonKm" (ngModelChange)="filtrerEtTrier()" min="1"></label>
+      <label>Trier par :
+        <select [(ngModel)]="triPar" (ngModelChange)="filtrerEtTrier()">
+          <option value="distance">Distance</option>
+          <option value="prix">Prix</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="cartes-depots">
+      @for (depot of depotsFiltres; track depot.id) {
+        <div class="carte-depot">
+          <h3>{{ depot.nom }} <span class="note">⭐ {{ depot.note }}</span></h3>
+          <p>{{ depot.adresse }}</p>
+          <p>
+            @if (distancePour(depot) !== null) {
+              {{ distancePour(depot)?.toFixed(1) }} km —
+            }
+            {{ depot.prix }} FCFA
+          </p>
+          <div class="tags">
+            @for (tag of depot.tags; track tag) {
+              <span class="tag">{{ tag }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div id="carte" class="panneau-carte"></div>
 </div>

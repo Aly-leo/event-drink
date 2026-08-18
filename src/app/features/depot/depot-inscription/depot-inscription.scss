@@ -1,0 +1,203 @@
+* { box-sizing: border-box; }
+
+.page-inscription {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(180deg, #fff8f3 0%, #f8f7f5 220px);
+  min-height: 100vh;
+}
+
+.entete {
+  text-align: center;
+  margin-bottom: 2.2rem;
+
+  h1 {
+    font-size: 2.1rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #e8590c, #d9480f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.5px;
+  }
+  p { color: #999; font-size: 0.95rem; }
+}
+
+.carte-section {
+  background: #fff;
+  border-radius: 18px;
+  padding: 1.6rem;
+  margin-bottom: 1.3rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  border: 1px solid #f2f0ed;
+  transition: box-shadow 0.25s ease;
+
+  &:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.07); }
+
+  h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+  
+
+.sous-texte { color: #888; font-size: 0.85rem; margin: -0.4rem 0 0.9rem; }
+
+.grille-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.champ {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.8rem;
+
+  label { font-size: 0.85rem; font-weight: 600; color: #444; margin-bottom: 0.4rem; }
+
+  input {
+    border: 1.5px solid #e5e3df;
+    border-radius: 10px;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+
+    &:focus { outline: none; border-color: #d9480f; }
+  }
+}
+
+.input-suffixe {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #e5e3df;
+  border-radius: 10px;
+  overflow: hidden;
+
+  input { border: none; flex: 1; }
+  span { padding: 0 0.9rem; color: #999; font-weight: 600; background: #faf9f7; align-self: stretch; display: flex; align-items: center; }
+}
+
+#carte-localisation {
+  height: 260px;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 0.8rem;
+  box-shadow: inset 0 0 0 1px #eee;
+}
+
+.btn-localiser {
+  width: 100%;
+  background: #fff6f0;
+  color: #d9480f;
+  border: 1.5px solid #f3c9a8;
+  border-radius: 10px;
+  padding: 0.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover { background: #ffe9d9; }
+}
+
+.toggle-ligne {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid #f2f2f2;
+
+  strong { font-size: 0.95rem; color: #1a1a1a; }
+  p { font-size: 0.8rem; color: #888; margin: 0.1rem 0 0; }
+}
+
+.switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+
+  input { opacity: 0; width: 0; height: 0; }
+
+  .slider {
+    position: absolute;
+    inset: 0;
+    background: #ddd;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: 0.25s;
+
+    &::before {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      left: 3px; top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: 0.25s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+  }
+
+  input:checked + .slider { background: #d9480f; }
+  input:checked + .slider::before { transform: translateX(20px); }
+}
+
+.zone-depot {
+  border: 2px dashed #ddd;
+  border-radius: 14px;
+  padding: 2rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover { border-color: #d9480f; background: #fff8f4; }
+
+  label { cursor: pointer; }
+  p { color: #666; font-weight: 600; margin: 0; }
+  small { color: #aaa; font-weight: 400; }
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.btn-secondaire {
+  flex: 1;
+  background: #fff;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
+  padding: 0.8rem;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+}
+
+.btn-principal {
+  flex: 1.5;
+  background: linear-gradient(135deg, #e8590c, #d9480f);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(217, 72, 15, 0.35);
+  transition: transform 0.15s;
+
+  &:hover:not(:disabled) { transform: translateY(-1px); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+

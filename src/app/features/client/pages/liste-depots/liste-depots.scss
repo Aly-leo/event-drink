@@ -1,0 +1,303 @@
+.entete-app {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.6rem;
+  background: #fff;
+  border-bottom: 1px solid #f0efec;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.entete-gauche {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+
+  .logo {
+    font-size: 1.25rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ff6b35, #d9480f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .livraison-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+
+    .label { font-size: 0.72rem; color: #aaa; }
+    .lieu { font-size: 0.9rem; font-weight: 700; color: #333; cursor: pointer; }
+  }
+}
+
+.entete-recherche {
+  flex: 1;
+  max-width: 420px;
+  margin: 0 2rem;
+
+  input {
+    width: 100%;
+    border: 1.5px solid #eee;
+    border-radius: 999px;
+    padding: 0.55rem 1.2rem;
+    font-size: 0.88rem;
+    background: #faf9f7;
+    transition: all 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #d9480f;
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(217, 72, 15, 0.08);
+    }
+  }
+}
+
+.entete-droite {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  .icone-panier {
+    background: #fff8f3;
+    border: 1.5px solid #f3d9c4;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover { background: #ffe9d9; transform: scale(1.05); }
+  }
+
+  .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff6b35, #d9480f);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 10px rgba(217, 72, 15, 0.3);
+  }
+}
+* { box-sizing: border-box; }
+
+.liste-depots {
+  display: flex;
+  height: calc(100vh - 68px);
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: #f8f7f5;
+  width: 100%;
+  overflow: hidden;
+}
+
+.panneau-gauche {
+  width: 42%;
+  overflow-y: auto;
+  padding: 2rem 1.8rem;
+  background: #fff;
+  box-shadow: 4px 0 24px rgba(0,0,0,0.06);
+  position: relative;
+  z-index: 2;
+  flex: 0 0 42%;
+  max-width: 42%;
+
+  h2 {
+    font-size: 1.7rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #e8590c, #d9480f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.2rem;
+    letter-spacing: -0.5px;
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1.3rem;
+
+  button {
+    border-radius: 999px;
+    padding: 0.5rem 1.2rem;
+    border: 1.5px solid #eee;
+    background: #fff;
+    color: #555;
+    font-size: 0.87rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: #d9480f;
+      color: #d9480f;
+      transform: translateY(-1px);
+    }
+
+    &.active {
+      background: linear-gradient(135deg, #ff6b35, #d9480f);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(217, 72, 15, 0.4);
+    }
+  }
+}
+
+.filtres {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.1rem;
+  background: linear-gradient(135deg, #fff8f3, #fdf5ee);
+  border: 1px solid #f3e5d8;
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.6rem;
+  font-size: 0.88rem;
+  color: #666;
+
+  button {
+    background: #fff;
+    border: 1.5px solid #f0c9a8;
+    color: #d9480f;
+    border-radius: 999px;
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.2s ease;
+
+    &:hover { background: #d9480f; color: #fff; }
+  }
+
+  input, select {
+    border: 1.5px solid #e5ddd3;
+    border-radius: 8px;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.87rem;
+    background: #fff;
+
+    &:focus { outline: none; border-color: #d9480f; }
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 600;
+  }
+}
+
+.cartes-depots {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.carte-depot {
+  background: #fff;
+  border: 1px solid #f0efec;
+  border-radius: 18px;
+  padding: 1.2rem 1.4rem;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.05);
+  transition: all 0.25s cubic-bezier(.2,.8,.2,1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #ff6b35, #d9480f);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 32px rgba(217, 72, 15, 0.14);
+    border-color: transparent;
+
+    &::before { opacity: 1; }
+  }
+
+  h3 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin: 0 0 0.4rem 0;
+
+    .note {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #b8860b;
+      background: linear-gradient(135deg, #fff6e0, #ffedc2);
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+  }
+
+  p {
+    margin: 0.25rem 0;
+    color: #777;
+    font-size: 0.9rem;
+
+    &:nth-of-type(2) { font-weight: 700; color: #d9480f; }
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.7rem;
+
+    .tag {
+      background: #f4f2ef;
+      color: #666;
+      border-radius: 999px;
+      padding: 0.28rem 0.75rem;
+      font-size: 0.76rem;
+      font-weight: 600;
+    }
+  }
+}
+
+.panneau-carte {
+  width: 58%;
+  position: relative;
+flex: 1 1 58%;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.08);
+    z-index: 1000;
+  }
+}
+
+// Scrollbar personnalisée
+.panneau-gauche::-webkit-scrollbar { width: 6px; }
+.panneau-gauche::-webkit-scrollbar-thumb {
+  background: #eadfd3;
+  border-radius: 999px;
+}

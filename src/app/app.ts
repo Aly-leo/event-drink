@@ -3,9 +3,9 @@ import { ListeDepots } from "./features/client/pages/liste-depots/liste-depots";
 
 @Component({
   selector: 'app-root',
-  imports: [ListeDepots],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrls: ['./app.scss'],
+  imports: [ListeDepots]
 })
 export class App {
   protected readonly title = signal('event-drink');

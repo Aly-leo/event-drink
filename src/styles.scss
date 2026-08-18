@@ -77,3 +77,31 @@ body {
     box-shadow: 0 10px 15px -3px rgba(30, 41, 59, 0.1);
   }
 }
+.pin-corps {
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, #ff6b35, #d9480f);
+  border: 3px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 4px 12px rgba(217, 72, 15, 0.5);
+  position: relative;
+}
+.pin-point {
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 8px;
+  left: 8px;
+}
+.leaflet-container {
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  width: 100% !important;
+  height: 100% !important;
+
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 12px !important;
+}
