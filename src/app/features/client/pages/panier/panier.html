@@ -1,0 +1,51 @@
+<div class="panier">
+  <div class="entete-panier">
+    <h1>🛒 Votre Panier</h1>
+    <p>Vérifiez votre commande avant de valider</p>
+  </div>
+
+  @if (articles.length === 0) {
+    <div class="panier-vide">
+      <p>Votre panier est vide.</p>
+    </div>
+  } @else {
+    <section class="carte-section">
+      @for (article of articles; track article.id) {
+        <div class="ligne-article">
+          <div class="info-article">
+            <strong>{{ article.nom }}</strong>
+            <span class="depot-nom">{{ article.depot }}</span>
+          </div>
+
+          <div class="controle-quantite">
+            <button type="button" (click)="diminuer(article)">−</button>
+            <span>{{ article.quantite }}</span>
+            <button type="button" (click)="augmenter(article)">+</button>
+          </div>
+
+          <div class="prix-article">{{ sousTotalPour(article) }} FCFA</div>
+
+          <button type="button" class="btn-supprimer" (click)="supprimer(article)">✕</button>
+        </div>
+      }
+    </section>
+
+    <section class="carte-section recap">
+      <h2>Récapitulatif</h2>
+      <div class="ligne-recap">
+        <span>Sous-total</span>
+        <span>{{ sousTotal }} FCFA</span>
+      </div>
+      <div class="ligne-recap">
+        <span>Frais de livraison</span>
+        <span>{{ fraisLivraison }} FCFA</span>
+      </div>
+      <div class="ligne-recap total">
+        <span>Total</span>
+        <strong>{{ total }} FCFA</strong>
+      </div>
+
+      <button type="button" class="btn-commander">Valider la commande →</button>
+    </section>
+  }
+</div>

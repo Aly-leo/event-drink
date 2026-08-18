@@ -1,0 +1,43 @@
+<div class="calculateur">
+  <div class="entete-calc">
+    <h1>🧮 Calculateur de quantités</h1>
+    <p>Estimez la quantité de boissons idéale pour votre événement</p>
+  </div>
+
+  <section class="carte-section">
+    <h2>Détails de l'événement</h2>
+    <div class="grille-2">
+      <div class="champ">
+        <label>Nombre d'invités</label>
+        <input type="number" [(ngModel)]="nombreInvites" min="1">
+      </div>
+      <div class="champ">
+        <label>Durée (heures)</label>
+        <input type="number" [(ngModel)]="dureeHeures" min="1">
+      </div>
+    </div>
+    <div class="champ">
+      <label>Marge de sécurité (%)</label>
+      <input type="range" [(ngModel)]="margeSecurite" min="0" max="50">
+      <span class="valeur-marge">{{ margeSecurite }}%</span>
+    </div>
+  </section>
+
+  <section class="carte-section">
+    <h2>Estimation par boisson</h2>
+    <div class="tableau-boissons">
+      @for (boisson of boissons; track boisson.nom) {
+        <div class="ligne-boisson">
+          <span class="nom">{{ boisson.nom }}</span>
+          <span class="quantite">{{ quantitePour(boisson) }} unités</span>
+          <span class="cout">{{ coutPour(boisson) }} FCFA</span>
+        </div>
+      }
+    </div>
+
+    <div class="total">
+      <span>Coût total estimé</span>
+      <strong>{{ coutTotal }} FCFA</strong>
+    </div>
+  </section>
+</div>

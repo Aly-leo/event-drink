@@ -1,0 +1,111 @@
+* { box-sizing: border-box; }
+
+.calculateur {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(180deg, #fff8f3 0%, #f8f7f5 220px);
+  min-height: 100vh;
+}
+
+.entete-calc {
+  text-align: center;
+  margin-bottom: 2.2rem;
+
+  h1 {
+    font-size: 2.1rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #e8590c, #d9480f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.4rem;
+  }
+  p { color: #999; font-size: 0.95rem; }
+}
+
+.carte-section {
+  background: #fff;
+  border-radius: 18px;
+  padding: 1.6rem;
+  margin-bottom: 1.3rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  border: 1px solid #f2f0ed;
+
+  h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 1rem;
+  }
+}
+
+.grille-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.champ {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.9rem;
+
+  label { font-size: 0.85rem; font-weight: 600; color: #444; margin-bottom: 0.4rem; }
+
+  input[type="number"] {
+    border: 1.5px solid #e5e3df;
+    border-radius: 10px;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.95rem;
+
+    &:focus { outline: none; border-color: #d9480f; }
+  }
+
+  input[type="range"] { accent-color: #d9480f; }
+}
+
+.valeur-marge {
+  font-weight: 700;
+  color: #d9480f;
+  font-size: 0.9rem;
+}
+
+.tableau-boissons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ligne-boisson {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  background: #faf9f7;
+  border-radius: 12px;
+  font-size: 0.9rem;
+
+  .nom { font-weight: 700; color: #1a1a1a; }
+  .quantite { color: #666; }
+  .cout { color: #d9480f; font-weight: 700; text-align: right; }
+}
+
+.total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.2rem;
+  padding-top: 1.2rem;
+  border-top: 2px dashed #eee;
+  font-size: 1.05rem;
+
+  strong {
+    font-size: 1.3rem;
+    background: linear-gradient(135deg, #e8590c, #d9480f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
