@@ -74,6 +74,7 @@ model User {
   password  String
   nom       String
   telephone String?
+  adresse   String?
   role      Role
   createdAt DateTime @default(now())
 
