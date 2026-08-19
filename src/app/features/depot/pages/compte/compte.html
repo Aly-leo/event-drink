@@ -1,0 +1,20 @@
+<div class="p-3 p-md-4">
+  <div class="mx-auto" style="max-width: 700px;">
+
+    <div class="mb-4"><h1 class="h4 fw-bold mb-1">Mon compte</h1><p class="text-secondary mb-0">Gérez vos informations de contact.</p></div>
+
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <form (ngSubmit)="enregistrer()">
+          <div class="mb-3"><label class="form-label fw-semibold" for="fullName">Nom complet</label><input class="form-control" id="fullName" name="fullName" required type="text" [ngModel]="nomComplet()" (ngModelChange)="nomComplet.set($event)"></div>
+          <div class="mb-3"><label class="form-label fw-semibold" for="email">Adresse e-mail</label><input class="form-control" id="email" name="email" required type="email" [ngModel]="email()" (ngModelChange)="email.set($event)"></div>
+          <div class="mb-4"><label class="form-label fw-semibold" for="phone">Numéro de téléphone</label><input class="form-control" id="phone" name="phone" type="tel" [ngModel]="telephone()" (ngModelChange)="telephone.set($event)"></div>
+          <div class="pt-3 border-top d-flex justify-content-end">
+            <button class="btn btn-primary d-flex align-items-center gap-2 px-4" type="submit"><i class="bi bi-check-lg"></i>Enregistrer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>

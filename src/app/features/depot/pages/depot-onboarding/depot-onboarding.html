@@ -1,0 +1,192 @@
+<main class="container py-4 py-md-5" style="max-width: 720px;">
+
+  <!-- En-tête -->
+  <header class="text-center mb-5">
+    <h1 class="h3 fw-bold" style="color:#a33900;">Configuration de votre Dépôt</h1>
+    <p class="text-secondary">Complétez ces informations pour commencer à recevoir des commandes.</p>
+  </header>
+
+  <form #depotForm="ngForm" (ngSubmit)="onSubmit(depotForm)">
+
+    <!-- Section 1 : Infos du dépôt -->
+    <section class="card shadow-sm mb-4">
+      <div class="card-body p-4">
+        <h2 class="h6 fw-semibold mb-4">
+          <i class="bi bi-shop me-2" style="color:#a33900;"></i>
+          Informations du Dépôt
+        </h2>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="nomDepot" class="form-label">Nom du Dépôt</label>
+            <input
+              id="nomDepot"
+              name="nomDepot"
+              type="text"
+              class="form-control rounded-pill px-3"
+              placeholder="Ex: Dépôt Central Akwa"
+              [(ngModel)]="modele.nomDepot"
+              #nomDepot="ngModel"
+              required
+              minlength="3"
+              [class.is-invalid]="nomDepot.invalid && nomDepot.touched"
+            />
+            @if (nomDepot.invalid && nomDepot.touched) {
+              <div class="invalid-feedback">
+                Le nom du dépôt doit contenir au moins 3 caractères.
+              </div>
+            }
+          </div>
+
+          <div class="col-md-6">
+            <label for="telephone" class="form-label">Numéro de Téléphone</label>
+            <input
+              id="telephone"
+              name="telephone"
+              type="tel"
+              class="form-control rounded-pill px-3"
+              placeholder="+237 XXX XXX XXX"
+              [(ngModel)]="modele.telephone"
+              #telephone="ngModel"
+              required
+              pattern="^\+?[0-9\s]{9,15}$"
+              [class.is-invalid]="telephone.invalid && telephone.touched"
+            />
+            @if (telephone.invalid && telephone.touched) {
+              <div class="invalid-feedback">
+                Merci d'entrer un numéro de téléphone valide.
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2 : Localisation -->
+    <section class="card shadow-sm mb-4">
+      <div class="card-body p-4">
+        <h2 class="h6 fw-semibold mb-2">
+          <i class="bi bi-geo-alt me-2" style="color:#a33900;"></i>
+          Localisation
+        </h2>
+        <p class="text-secondary small mb-3">
+          Indiquez la position précise de votre dépôt pour faciliter les livraisons.
+        </p>
+
+        <div class="map-placeholder rounded-3 border d-flex align-items-center justify-content-center position-relative" style="height:220px; background:#f1f5f9;">
+          <i class="bi bi-geo-alt-fill fs-1" style="color:#a33900;"></i>
+          <div class="position-absolute bottom-0 start-0 end-0 m-3 p-2 bg-white bg-opacity-75 rounded-3 border small text-secondary">
+            <i class="bi bi-info-circle me-1"></i>
+            La sélection de position sur carte sera activée une fois l'intégration cartographique en place.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3 : Services & Livraison -->
+    <section class="card shadow-sm mb-4">
+      <div class="card-body p-4">
+        <h2 class="h6 fw-semibold mb-4">
+          <i class="bi bi-truck me-2" style="color:#a33900;"></i>
+          Services &amp; Livraison
+        </h2>
+
+        <div class="d-flex align-items-center justify-content-between border rounded-3 p-3 mb-3">
+          <div>
+            <div class="fw-semibold">Retrait sur place</div>
+            <div class="small text-secondary">Les clients viennent récupérer leurs commandes.</div>
+          </div>
+          <div class="form-check form-switch">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              role="switch"
+              name="retraitSurPlace"
+              [(ngModel)]="modele.retraitSurPlace"
+              style="width:2.5em; height:1.4em;"
+            />
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between border rounded-3 p-3 mb-4">
+          <div>
+            <div class="fw-semibold">Livraison à domicile</div>
+            <div class="small text-secondary">Vous proposez la livraison aux clients.</div>
+          </div>
+          <div class="form-check form-switch">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              role="switch"
+              name="livraisonDomicile"
+              [(ngModel)]="modele.livraisonDomicile"
+              style="width:2.5em; height:1.4em;"
+            />
+          </div>
+        </div>
+
+        <label for="fraisLivraison" class="form-label">Frais de livraison personnalisés (Base)</label>
+        <div class="input-group">
+          <input
+            id="fraisLivraison"
+            name="fraisLivraison"
+            type="number"
+            class="form-control rounded-start-pill"
+            [(ngModel)]="modele.fraisLivraison"
+            #fraisLivraison="ngModel"
+            required
+            min="0"
+            [class.is-invalid]="fraisLivraison.invalid && fraisLivraison.touched"
+          />
+          <span class="input-group-text rounded-end-pill">FCFA</span>
+        </div>
+        @if (fraisLivraison.invalid && fraisLivraison.touched) {
+          <div class="text-danger small mt-1">Merci d'indiquer un montant valide.</div>
+        }
+      </div>
+    </section>
+
+    <!-- Section 4 : Documents -->
+    <section class="card shadow-sm mb-4">
+      <div class="card-body p-4">
+        <h2 class="h6 fw-semibold mb-2">
+          <i class="bi bi-patch-check me-2" style="color:#a33900;"></i>
+          Documents de vérification
+        </h2>
+        <p class="text-secondary small mb-3">
+          Veuillez fournir un Registre de commerce ou un NIU valide.
+        </p>
+
+        <label
+          for="document"
+          class="d-flex flex-column align-items-center justify-content-center border border-2 border-dashed rounded-3 p-5 text-center"
+          style="cursor:pointer; background:#fff;"
+        >
+          <i class="bi bi-cloud-arrow-up fs-2 mb-2" style="color:#a33900;"></i>
+          <span class="fw-semibold">Glissez-déposez vos fichiers ici</span>
+          <span class="small text-secondary">ou cliquez pour parcourir (PDF, JPG, PNG)</span>
+          <input id="document" type="file" class="d-none" accept=".pdf,.jpg,.jpeg,.png" (change)="onFichierChange($event)" />
+        </label>
+
+        @if (fichierSelectionne()) {
+          <div class="mt-3 small text-success">
+            <i class="bi bi-check-circle me-1"></i>
+            Fichier sélectionné : {{ fichierSelectionne()!.name }}
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Actions -->
+    <div class="d-flex flex-column flex-sm-row justify-content-end gap-3 pt-2">
+      <button type="button" class="btn btn-outline-secondary rounded-pill px-4" (click)="enregistrerBrouillon()">
+        Enregistrer comme brouillon
+      </button>
+      <button type="submit" class="btn rounded-pill px-4 text-white" style="background-color:#a33900;">
+        Terminer la configuration
+        <i class="bi bi-arrow-right ms-1"></i>
+      </button>
+    </div>
+
+  </form>
+</main>

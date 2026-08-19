@@ -1,0 +1,13 @@
+.nav-link-custom {
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+
+  &:hover {
+    background-color: var(--ed-surface-container-low, #eff4ff);
+    color: var(--ed-primary, #a33900);
+  }
+}
+
+.active-nav-link {
+  background-color: var(--ed-primary, #a33900) !important;
+  color: #fff !important;
+}

@@ -1,0 +1,79 @@
+// ─────────────────────────────────────────────────────────
+// Eventdrink — thème Bootstrap 5.3
+// Palette reprise du design system (amber/slate), adaptée à la marque Eventdrink.
+// ─────────────────────────────────────────────────────────
+
+// Couleurs de marque
+$primary: #a33900;
+$primary-hover: #cc4900;
+$secondary: #545f73;
+$tertiary: #f59e0b;
+$success: #10b981;
+$danger: #ba1a1a;
+$warning: #f59e0b;
+$info: #545f73;
+$light: #f8fafc;
+$dark: #0b1c30;
+// $confirme:#0d6efd;
+$body-bg: #f8fafc;
+$body-color: #0b1c30;
+$border-color: #e2e8f0;
+
+// Typo
+$font-family-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$font-weight-bold: 700;
+$headings-font-weight: 700;
+
+// Formes
+$border-radius: 0.5rem;
+$border-radius-sm: 0.25rem;
+$border-radius-lg: 1rem;
+$border-radius-xl: 1.5rem;
+$border-radius-pill: 50rem;
+
+// Boutons / inputs
+$input-border-radius: $border-radius-pill;
+$btn-border-radius: $border-radius;
+$card-border-radius: $border-radius-lg;
+
+@import 'bootstrap/scss/bootstrap';
+
+// ─────────────────────────────────────────────────────────
+// Tokens custom (repris du design system Stitch) pour usage
+// hors composants Bootstrap standard (surfaces, cartes produits/dépôts).
+// ─────────────────────────────────────────────────────────
+:root {
+  --ed-surface: #f8fafc;
+  --ed-surface-container-lowest: #ffffff;
+  --ed-surface-container-low: #eff4ff;
+  --ed-surface-container: #e5eeff;
+  --ed-surface-container-high: #dce9ff;
+  --ed-on-surface: #0b1c30;
+  --ed-on-surface-variant: #5a4138;
+  --ed-outline: #8e7166;
+  --ed-outline-variant: #e2bfb2;
+  --ed-primary: #{$primary};
+  --ed-primary-hover: #{$primary-hover};
+  --ed-secondary: #{$secondary};
+  --ed-tertiary: #{$tertiary};
+  --ed-success: #{$success};
+  --ed-border: #{$border-color};
+  --ed-radius-card: #{$border-radius-lg};
+  --ed-radius-pill: #{$border-radius-pill};
+}
+
+body {
+  font-family: $font-family-sans-serif;
+}
+
+// Carte produit/dépôt — élévation douce au survol (cf. design system)
+.ed-card {
+  background: var(--ed-surface-container-lowest);
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius-card);
+  transition: box-shadow 0.15s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 10px 15px -3px rgba(30, 41, 59, 0.1);
+  }
+}
