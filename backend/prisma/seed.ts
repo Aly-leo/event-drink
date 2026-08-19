@@ -63,7 +63,7 @@ async function main() {
   });
 
   const clientPassword = await hash(PASSWORD);
-  await prisma.user.create({
+  const client = await prisma.user.create({
     data: {
       email: 'client@eventdrink.test',
       password: clientPassword,
@@ -115,6 +115,8 @@ async function main() {
     },
   ];
 
+  const depotsCreated = [];
+
   for (const d of depotsSeed) {
     const owner = await prisma.user.create({
       data: {
@@ -154,7 +156,43 @@ async function main() {
         },
       });
     }
+
+    depotsCreated.push(depot);
   }
+
+  console.log('Seed: plaintes de démo...');
+  await prisma.plainte.create({
+    data: {
+      clientId: client.id,
+      depotId: depotsCreated[0].id,
+      referenceCommande: 'FAC-2026-8942',
+      motif: 'REFUS_CONSIGNE',
+      message:
+        "J'ai essayé de retourner 5 casiers de bières comme indiqué sur la facture FAC-2026-8942, mais le dépôt a refusé de les reprendre en disant qu'ils étaient complets, alors qu'il s'agit d'un point de retour désigné.",
+      statut: 'EN_ATTENTE',
+    },
+  });
+  await prisma.plainte.create({
+    data: {
+      clientId: client.id,
+      depotId: depotsCreated[1].id,
+      referenceCommande: 'FAC-2026-8955',
+      motif: 'RETARD_LIVRAISON',
+      message: 'La livraison prévue à 14h est arrivée avec plus de 3 heures de retard, sans aucune notification.',
+      statut: 'EN_ATTENTE',
+    },
+  });
+  await prisma.plainte.create({
+    data: {
+      clientId: client.id,
+      depotId: depotsCreated[0].id,
+      referenceCommande: 'FAC-2026-8911',
+      motif: 'PRODUIT_MANQUANT',
+      message: "Il manquait 2 casiers de Mützig par rapport à ce qui était indiqué sur le reçu.",
+      statut: 'RESOLUE',
+      actionAdmin: 'AVERTISSEMENT',
+    },
+  });
 
   console.log('Seed terminé.');
 }
