@@ -49,11 +49,16 @@
               <div class="col-6 col-md-4">
                 <div class="ed-card p-0 h-100 d-flex flex-column" [class.opacity-50]="!pd.disponible">
                   <div
-                    class="d-flex align-items-center justify-content-center"
-                    style="height: 110px; background: var(--ed-surface-container-low);"
+                    class="d-flex align-items-center justify-content-center border-bottom"
+                    style="height: 160px; background: #fff; border-color: var(--ed-border) !important;"
                   >
                     @if (pd.produit.visuelUrl) {
-                      <img [src]="pd.produit.visuelUrl" [alt]="pd.produit.nom" class="w-100 h-100" style="object-fit: cover;" />
+                      <img
+                        [src]="pd.produit.visuelUrl"
+                        [alt]="pd.produit.nom"
+                        class="w-100 h-100 p-2"
+                        style="object-fit: contain;"
+                      />
                     } @else {
                       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ed-outline)" stroke-width="1.5">
                         <path d="M8 2h8l1 4v3a5 5 0 0 1-10 0V6l1-4Z" />

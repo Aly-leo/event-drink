@@ -8,11 +8,11 @@
       @for (item of cartService.items(); track item.produitDepotId) {
         <div class="ed-card p-2 d-flex align-items-center gap-3">
           <div
-            class="d-flex align-items-center justify-content-center flex-shrink-0 rounded-3"
-            style="width: 64px; height: 64px; background: var(--ed-surface-container-low);"
+            class="d-flex align-items-center justify-content-center flex-shrink-0 rounded-3 border"
+            style="width: 64px; height: 64px; background: #fff; border-color: var(--ed-border) !important;"
           >
             @if (item.visuelUrl) {
-              <img [src]="item.visuelUrl" [alt]="item.nom" class="w-100 h-100 rounded-3" style="object-fit: cover;" />
+              <img [src]="item.visuelUrl" [alt]="item.nom" class="w-100 h-100 p-1" style="object-fit: contain;" />
             } @else {
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ed-outline)" stroke-width="1.5">
                 <path d="M8 2h8l1 4v3a5 5 0 0 1-10 0V6l1-4Z" />
