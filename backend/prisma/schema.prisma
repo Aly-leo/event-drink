@@ -48,6 +48,26 @@ enum StatutConsigne {
   REMBOURSEE
 }
 
+enum MotifPlainte {
+  REFUS_CONSIGNE
+  PRODUIT_MANQUANT
+  PRODUIT_ENDOMMAGE
+  RETARD_LIVRAISON
+  QUALITE_SERVICE
+  AUTRE
+}
+
+enum StatutPlainte {
+  EN_ATTENTE
+  RESOLUE
+}
+
+enum ActionAdminPlainte {
+  AVERTISSEMENT
+  SUSPENSION_TEMPORAIRE
+  BANNISSEMENT
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -59,6 +79,7 @@ model User {
 
   depot     Depot?
   commandes Commande[]
+  plaintes  Plainte[]
 
   @@map("users")
 }
@@ -80,6 +101,7 @@ model Depot {
 
   produits  ProduitDepot[]
   commandes Commande[]
+  plaintes  Plainte[]
 
   @@map("depots")
 }
@@ -158,4 +180,21 @@ model Consigne {
   createdAt       DateTime        @default(now())
 
   @@map("consignes")
+}
+
+model Plainte {
+  id                String              @id @default(cuid())
+  clientId          String
+  client            User                @relation(fields: [clientId], references: [id])
+  depotId           String
+  depot             Depot               @relation(fields: [depotId], references: [id])
+  referenceCommande String?
+  motif             MotifPlainte
+  message           String
+  photoUrl          String?
+  statut            StatutPlainte       @default(EN_ATTENTE)
+  actionAdmin       ActionAdminPlainte?
+  createdAt         DateTime            @default(now())
+
+  @@map("plaintes")
 }
