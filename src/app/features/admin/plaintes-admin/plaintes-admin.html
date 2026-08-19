@@ -1,0 +1,134 @@
+<div class="container-fluid py-4">
+  <div class="mb-4">
+    <h1 class="h3 fw-bold text-primary mb-0">Registre des plaintes</h1>
+    <p class="text-secondary mb-0">Suivi et résolution des signalements clients par dépôt.</p>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger" role="alert">
+      {{ error() }}
+      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">Réessayer</button>
+    </div>
+  } @else if (loading()) {
+    <div class="text-center text-secondary py-5">
+      <span class="spinner-border spinner-border-sm me-2"></span>
+      Chargement...
+    </div>
+  } @else if (plaintes().length === 0) {
+    <div class="text-center text-secondary py-5">Aucune plainte pour l'instant.</div>
+  } @else {
+    <div class="row g-3">
+      <div class="col-lg-8">
+        <div class="ed-card p-0">
+          <table class="table table-hover mb-0 align-middle">
+            <thead>
+              <tr>
+                <th>Statut</th>
+                <th>Client</th>
+                <th>Dépôt</th>
+                <th>Référence</th>
+                <th>Motif</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (plainte of plaintes(); track plainte.id) {
+                <tr
+                  role="button"
+                  [class.table-active]="selectedId() === plainte.id"
+                  (click)="select(plainte)"
+                >
+                  <td>
+                    @if (plainte.statut === StatutPlainte.RESOLUE) {
+                      <span class="badge bg-success-subtle text-success-emphasis">Résolue</span>
+                    } @else {
+                      <span class="badge bg-warning-subtle text-warning-emphasis">En attente</span>
+                    }
+                  </td>
+                  <td>{{ plainte.client.nom }}</td>
+                  <td>{{ plainte.depot.nomCommerce }}</td>
+                  <td>{{ plainte.referenceCommande ?? '—' }}</td>
+                  <td>{{ motifLabels[plainte.motif] }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        @if (selected(); as plainte) {
+          <div class="ed-card p-3">
+            <div class="small text-secondary mb-1">Dossier sélectionné</div>
+            <div class="fw-bold mb-3">{{ plainte.id }}</div>
+
+            <div class="small text-secondary">Motif</div>
+            <div class="mb-3">{{ motifLabels[plainte.motif] }}</div>
+
+            @if (plainte.referenceCommande) {
+              <div class="small text-secondary">Référence facture</div>
+              <div class="mb-3">{{ plainte.referenceCommande }}</div>
+            }
+
+            <div class="small text-secondary">Message</div>
+            <p class="mb-3">{{ plainte.message }}</p>
+
+            @if (plainte.photoUrl) {
+              <div class="small text-secondary mb-1">Preuve</div>
+              <img [src]="plainte.photoUrl" alt="Preuve jointe" class="img-fluid rounded mb-3" />
+            }
+
+            @if (plainte.actionAdmin) {
+              <div class="alert alert-secondary py-2 small">
+                Action déjà appliquée : {{ actionLabels[plainte.actionAdmin] }}
+              </div>
+            }
+
+            <hr />
+
+            <div class="small text-secondary mb-2">Actions admin</div>
+            <div class="d-grid gap-2">
+              @if (plainte.statut === StatutPlainte.EN_ATTENTE) {
+                <button
+                  type="button"
+                  class="btn btn-outline-success btn-sm"
+                  [disabled]="actionEnCours()"
+                  (click)="resoudre(plainte)"
+                >
+                  Marquer comme résolue
+                </button>
+              }
+              <button
+                type="button"
+                class="btn btn-outline-warning btn-sm"
+                [disabled]="actionEnCours()"
+                (click)="appliquerAction(plainte, ActionAdminPlainte.AVERTISSEMENT)"
+              >
+                Avertissement
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-secondary btn-sm"
+                [disabled]="actionEnCours()"
+                (click)="appliquerAction(plainte, ActionAdminPlainte.SUSPENSION_TEMPORAIRE)"
+              >
+                Suspension temporaire du dépôt
+              </button>
+              <button
+                type="button"
+                class="btn btn-danger btn-sm"
+                [disabled]="actionEnCours()"
+                (click)="appliquerAction(plainte, ActionAdminPlainte.BANNISSEMENT)"
+              >
+                Bannissement permanent
+              </button>
+            </div>
+          </div>
+        } @else {
+          <div class="ed-card p-4 text-center text-secondary">
+            Sélectionne une plainte dans la liste pour voir le détail.
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

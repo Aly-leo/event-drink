@@ -29,6 +29,7 @@ export class CatalogueAdmin {
   readonly showForm = signal(false);
   readonly submitting = signal(false);
   readonly formError = signal<string | null>(null);
+  readonly editingId = signal<string | null>(null);
 
   readonly form = this.fb.group({
     nom: ['', [Validators.required]],
@@ -59,8 +60,27 @@ export class CatalogueAdmin {
   }
 
   toggleForm(): void {
-    this.showForm.update((v) => !v);
+    const willShow = !this.showForm();
+    this.showForm.set(willShow);
     this.formError.set(null);
+    if (!willShow) {
+      this.editingId.set(null);
+      this.form.reset({ categorie: CategorieProduit.BIERE_LOCALE, estConsignable: false });
+    }
+  }
+
+  editer(produit: Produit): void {
+    this.editingId.set(produit.id);
+    this.formError.set(null);
+    this.form.setValue({
+      nom: produit.nom,
+      marque: produit.marque,
+      contenance: produit.contenance,
+      categorie: produit.categorie,
+      visuelUrl: produit.visuelUrl ?? '',
+      estConsignable: produit.estConsignable,
+    });
+    this.showForm.set(true);
   }
 
   submit(): void {
@@ -73,27 +93,34 @@ export class CatalogueAdmin {
     this.formError.set(null);
 
     const value = this.form.getRawValue();
+    const payload = {
+      nom: value.nom!,
+      marque: value.marque!,
+      contenance: value.contenance!,
+      categorie: value.categorie!,
+      visuelUrl: value.visuelUrl || undefined,
+      estConsignable: !!value.estConsignable,
+    };
 
-    this.catalogueService
-      .createProduit({
-        nom: value.nom!,
-        marque: value.marque!,
-        contenance: value.contenance!,
-        categorie: value.categorie!,
-        visuelUrl: value.visuelUrl || undefined,
-        estConsignable: !!value.estConsignable,
-      })
-      .subscribe({
-        next: (produit) => {
-          this.produits.update((list) => [...list, produit].sort((a, b) => a.nom.localeCompare(b.nom)));
-          this.submitting.set(false);
-          this.showForm.set(false);
-          this.form.reset({ categorie: CategorieProduit.BIERE_LOCALE, estConsignable: false });
-        },
-        error: (err) => {
-          this.submitting.set(false);
-          this.formError.set(err?.error?.message ?? "Impossible d'ajouter le produit.");
-        },
-      });
+    const editingId = this.editingId();
+    const request = editingId
+      ? this.catalogueService.updateProduit(editingId, payload)
+      : this.catalogueService.createProduit(payload);
+
+    request.subscribe({
+      next: (produit) => {
+        this.produits.update((list) =>
+          [...list.filter((p) => p.id !== produit.id), produit].sort((a, b) => a.nom.localeCompare(b.nom))
+        );
+        this.submitting.set(false);
+        this.showForm.set(false);
+        this.editingId.set(null);
+        this.form.reset({ categorie: CategorieProduit.BIERE_LOCALE, estConsignable: false });
+      },
+      error: (err) => {
+        this.submitting.set(false);
+        this.formError.set(err?.error?.message ?? "Impossible d'enregistrer le produit.");
+      },
+    });
   }
 }

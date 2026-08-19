@@ -1,0 +1,98 @@
+<div class="container-fluid py-4">
+  <div class="mb-4">
+    <h1 class="h3 fw-bold text-primary mb-0">Vue d'ensemble</h1>
+    <p class="text-secondary mb-0">Opérations globales et approbations.</p>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger" role="alert">
+      {{ error() }}
+      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">Réessayer</button>
+    </div>
+  }
+
+  @if (stats(); as s) {
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="ed-card p-3">
+          <div class="text-secondary small">Dépôts actifs</div>
+          <div class="h3 fw-bold mb-0">{{ s.depotsActifs }}</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="ed-card p-3">
+          <div class="text-secondary small">Dépôts en attente</div>
+          <div class="h3 fw-bold mb-0">{{ s.depotsEnAttente }}</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="ed-card p-3">
+          <div class="text-secondary small">Chiffre d'affaires total</div>
+          <div class="h3 fw-bold mb-0">{{ s.chiffreAffairesTotal | number }} FCFA</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="ed-card p-3">
+          <div class="text-secondary small">Plaintes en attente</div>
+          <div class="h3 fw-bold mb-0">{{ s.plaintesEnAttente }}</div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="ed-card p-0">
+    <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+      <h2 class="h5 fw-bold mb-0">File d'approbation des dépôts</h2>
+      <span class="badge bg-primary-subtle text-primary-emphasis">
+        {{ depotsEnAttente().length }} en attente
+      </span>
+    </div>
+
+    @if (loading()) {
+      <div class="text-center text-secondary py-5">
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        Chargement...
+      </div>
+    } @else if (depotsEnAttente().length === 0) {
+      <div class="text-center text-secondary py-5">Aucun dépôt en attente d'approbation.</div>
+    } @else {
+      <table class="table table-hover mb-0 align-middle">
+        <thead>
+          <tr>
+            <th>Dépôt</th>
+            <th>Adresse</th>
+            <th>Frais de livraison</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (depot of depotsEnAttente(); track depot.id) {
+            <tr>
+              <td>{{ depot.nomCommerce }}</td>
+              <td>{{ depot.adresse }}</td>
+              <td>{{ depot.fraisLivraison | number }} FCFA</td>
+              <td class="text-end">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger me-2"
+                  [disabled]="actionEnCours() === depot.id"
+                  (click)="rejeter(depot)"
+                >
+                  Rejeter
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-success"
+                  [disabled]="actionEnCours() === depot.id"
+                  (click)="valider(depot)"
+                >
+                  Valider
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
