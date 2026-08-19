@@ -199,6 +199,75 @@ Mêmes champs que `POST`, tous optionnels. `404` si produit introuvable.
 
 ---
 
+## Admin & Plaintes — implémenté
+
+> Construit en avance sur le planning jour-par-jour (dashboard admin complet). Pas de vrai upload de fichier : `photoUrl` reste un champ URL texte.
+
+### `GET /admin/stats` — rôle `ADMIN`
+```json
+{
+  "depotsActifs": 2,
+  "depotsEnAttente": 1,
+  "chiffreAffairesTotal": 0,
+  "consignesActives": 0,
+  "plaintesEnAttente": 2
+}
+```
+`chiffreAffairesTotal` (somme de `Commande.montantTotal`) et `consignesActives` (somme de `Consigne.montant` où `statut: BLOQUEE`) sont de vraies agrégations Prisma — elles resteront à `0` tant que le flux commandes (Jour 3-4) n'existe pas, ce ne sont pas des valeurs figées.
+
+### `GET /admin/depots?statut=` — rôle `ADMIN`
+Tous les dépôts, tout statut confondu (filtrable), pour la gestion. Distinct de `GET /depots` (public, VALIDE uniquement). Même format de réponse que `GET /depots`, sans `distanceKm`.
+
+### `PATCH /admin/depots/:id/valider` — rôle `ADMIN`
+Statut → `VALIDE`. 404 si dépôt introuvable.
+
+### `PATCH /admin/depots/:id/bloquer` — rôle `ADMIN`
+Statut → `BLOQUE`. 404 si dépôt introuvable. Utilisé aussi bien pour rejeter un dépôt en attente que pour bloquer un dépôt déjà validé.
+
+### `POST /plaintes` — rôle `CLIENT`
+```json
+{
+  "depotId": "clx...",
+  "referenceCommande": "FAC-2026-8942",
+  "motif": "REFUS_CONSIGNE",
+  "message": "...",
+  "photoUrl": "https://..."
+}
+```
+`referenceCommande` et `photoUrl` optionnels. `motif` : `REFUS_CONSIGNE` \| `PRODUIT_MANQUANT` \| `PRODUIT_ENDOMMAGE` \| `RETARD_LIVRAISON` \| `QUALITE_SERVICE` \| `AUTRE`. `clientId` pris du JWT, jamais du body. 404 si `depotId` inconnu. Réponse `201`.
+
+### `GET /plaintes?statut=&depotId=` — rôle `ADMIN`
+```json
+[
+  {
+    "id": "clx...",
+    "referenceCommande": "FAC-2026-8942",
+    "motif": "REFUS_CONSIGNE",
+    "message": "...",
+    "photoUrl": null,
+    "statut": "EN_ATTENTE",
+    "actionAdmin": null,
+    "createdAt": "2026-08-14T14:35:04.628Z",
+    "client": { "id": "clx...", "nom": "Client Démo", "email": "client@eventdrink.test" },
+    "depot": { "id": "clx...", "nomCommerce": "Depot Centrale Akwa" }
+  }
+]
+```
+
+### `GET /plaintes/:id` — rôle `ADMIN`
+Même forme, une seule plainte. 404 si introuvable.
+
+### `PATCH /plaintes/:id/resoudre` — rôle `ADMIN`
+Statut → `RESOLUE`.
+
+### `PATCH /plaintes/:id/action` — rôle `ADMIN`
+```json
+{ "action": "AVERTISSEMENT" }
+```
+`action` : `AVERTISSEMENT` \| `SUSPENSION_TEMPORAIRE` \| `BANNISSEMENT`. Enregistre `actionAdmin` sur la plainte. Si `SUSPENSION_TEMPORAIRE` ou `BANNISSEMENT`, bascule aussi automatiquement le dépôt lié en `statut: BLOQUE`.
+
+---
+
 ## Squelette des routes à venir (Jour 3-4)
 
 > Non implémentées — formes indicatives pour que Carmen/Nadia puissent mocker dès maintenant. Ce fichier sera mis à jour à chaque implémentation réelle.
@@ -229,12 +298,6 @@ Valeurs `statut` selon le mode (`RETRAIT` : `EN_ATTENTE → CONFIRMEE → PRETE_
 
 `GET /consignes?depotId=...` (DEPOT) — consignes `BLOQUEE` dues.
 `PATCH /consignes/:id/restituer` (DEPOT) — passe le statut à `REMBOURSEE`.
-
-### Admin (Jour 2-3)
-
-`GET /admin/depots?statut=EN_ATTENTE` — file de validation.
-`PATCH /admin/depots/:id/valider` / `PATCH /admin/depots/:id/bloquer`.
-`GET /admin/stats` — compteurs simples (nb dépôts, nb commandes, etc.).
 
 ---
 
