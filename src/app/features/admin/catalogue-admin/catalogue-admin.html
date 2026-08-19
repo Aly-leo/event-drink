@@ -1,0 +1,117 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h3 fw-bold text-primary mb-0">Catalogue central</h1>
+      <p class="text-secondary mb-0">Produits de référence disponibles pour tous les dépôts.</p>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="toggleForm()">
+      {{ showForm() ? 'Annuler' : '+ Ajouter un produit' }}
+    </button>
+  </div>
+
+  @if (showForm()) {
+    <div class="ed-card p-4 mb-4">
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="nom" class="form-label">Nom</label>
+            <input id="nom" type="text" class="form-control" formControlName="nom" />
+          </div>
+          <div class="col-md-6">
+            <label for="marque" class="form-label">Marque</label>
+            <input id="marque" type="text" class="form-control" formControlName="marque" />
+          </div>
+          <div class="col-md-4">
+            <label for="contenance" class="form-label">Contenance</label>
+            <input
+              id="contenance"
+              type="text"
+              class="form-control"
+              formControlName="contenance"
+              placeholder="ex. 65cl bouteille"
+            />
+          </div>
+          <div class="col-md-4">
+            <label for="categorie" class="form-label">Catégorie</label>
+            <select id="categorie" class="form-select" formControlName="categorie">
+              @for (cat of Categories; track cat) {
+                <option [value]="cat">{{ categorieLabels[cat] }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="visuelUrl" class="form-label">Visuel (URL, optionnel)</label>
+            <input id="visuelUrl" type="text" class="form-control" formControlName="visuelUrl" />
+          </div>
+          <div class="col-12">
+            <div class="form-check">
+              <input
+                id="estConsignable"
+                type="checkbox"
+                class="form-check-input"
+                formControlName="estConsignable"
+              />
+              <label for="estConsignable" class="form-check-label">Consignable</label>
+            </div>
+          </div>
+        </div>
+
+        @if (formError()) {
+          <div class="alert alert-danger py-2 mt-3" role="alert">{{ formError() }}</div>
+        }
+
+        <button type="submit" class="btn btn-primary mt-3" [disabled]="submitting()">
+          @if (submitting()) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+          }
+          Enregistrer
+        </button>
+      </form>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="text-center text-secondary py-5">
+      <span class="spinner-border spinner-border-sm me-2"></span>
+      Chargement du catalogue...
+    </div>
+  } @else if (error()) {
+    <div class="alert alert-danger" role="alert">
+      {{ error() }}
+      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">Réessayer</button>
+    </div>
+  } @else if (produits().length === 0) {
+    <div class="text-center text-secondary py-5">Aucun produit dans le catalogue pour l'instant.</div>
+  } @else {
+    <div class="ed-card p-0">
+      <table class="table table-hover mb-0 align-middle">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Marque</th>
+            <th>Contenance</th>
+            <th>Catégorie</th>
+            <th>Consignable</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (produit of produits(); track produit.id) {
+            <tr>
+              <td>{{ produit.nom }}</td>
+              <td>{{ produit.marque }}</td>
+              <td>{{ produit.contenance }}</td>
+              <td>{{ categorieLabels[produit.categorie] }}</td>
+              <td>
+                @if (produit.estConsignable) {
+                  <span class="badge bg-success-subtle text-success-emphasis">Oui</span>
+                } @else {
+                  <span class="badge bg-secondary-subtle text-secondary-emphasis">Non</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
