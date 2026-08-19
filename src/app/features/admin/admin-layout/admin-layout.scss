@@ -1,0 +1,14 @@
+// Sidebar : overlay coulissant sur mobile, statique et toujours visible a partir de lg.
+.admin-sidebar {
+  transform: translateX(-100%);
+
+  &.admin-sidebar--open {
+    transform: translateX(0);
+  }
+}
+
+@media (min-width: 992px) {
+  .admin-sidebar {
+    transform: none !important;
+  }
+}

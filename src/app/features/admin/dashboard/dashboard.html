@@ -93,6 +93,7 @@
     } @else if (depotsEnAttente().length === 0) {
       <div class="text-center text-secondary py-5">Aucun dépôt en attente d'approbation.</div>
     } @else {
+      <div class="table-responsive">
       <table class="table table-hover mb-0 align-middle">
         <thead>
           <tr>
@@ -143,6 +144,7 @@
           }
         </tbody>
       </table>
+      </div>
     }
   </div>
 </div>
