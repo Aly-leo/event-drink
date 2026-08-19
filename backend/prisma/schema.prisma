@@ -97,6 +97,7 @@ model Depot {
   modeRetrait     Boolean     @default(true)
   fraisLivraison  Int         @default(0)
   statut          StatutDepot @default(EN_ATTENTE)
+  visuelUrl       String?
   createdAt       DateTime    @default(now())
 
   produits  ProduitDepot[]
@@ -144,12 +145,14 @@ model Commande {
   client          User           @relation(fields: [clientId], references: [id])
   depotId         String
   depot           Depot          @relation(fields: [depotId], references: [id])
-  mode            ModeReception
-  statut          StatutCommande @default(EN_ATTENTE)
-  montantTotal    Int
-  fraisLivraison  Int            @default(0)
-  referenceUnique String         @unique
-  createdAt       DateTime       @default(now())
+  mode              ModeReception
+  statut            StatutCommande @default(EN_ATTENTE)
+  montantTotal      Int
+  fraisLivraison    Int            @default(0)
+  referenceUnique   String         @unique
+  adresseLivraison  String?
+  instructions      String?
+  createdAt         DateTime       @default(now())
 
   lignes LigneCommande[]
 
