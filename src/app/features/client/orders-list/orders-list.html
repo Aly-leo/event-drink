@@ -1,0 +1,42 @@
+<div class="container-fluid py-3" style="max-width: 720px;">
+  <h1 class="h4 fw-bold text-primary mb-4">Mes commandes</h1>
+
+  @if (loading()) {
+    <div class="text-center text-secondary py-5">
+      <span class="spinner-border spinner-border-sm me-2"></span>
+      Chargement...
+    </div>
+  } @else if (error()) {
+    <div class="alert alert-danger" role="alert">
+      {{ error() }}
+      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">Réessayer</button>
+    </div>
+  } @else if (commandes().length === 0) {
+    <div class="text-center text-secondary py-5">
+      <p class="mb-3">Tu n'as pas encore passé de commande.</p>
+      <a routerLink="/client/explorer" class="btn btn-outline-primary">Explorer les dépôts</a>
+    </div>
+  } @else {
+    <div class="d-flex flex-column gap-3">
+      @for (commande of commandes(); track commande.id) {
+        <a
+          [routerLink]="['/client/commandes', commande.id]"
+          class="ed-card p-3 text-decoration-none text-body d-flex justify-content-between align-items-center"
+        >
+          <div>
+            <div class="fw-semibold small">{{ commande.referenceUnique }}</div>
+            <div class="small text-secondary">
+              {{ commande.depot.nomCommerce }} · {{ commande.createdAt | date: 'dd/MM/yyyy' }}
+            </div>
+          </div>
+          <div class="text-end">
+            <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis mb-1 d-block">
+              {{ labelsStatut[commande.statut] }}
+            </span>
+            <div class="fw-bold small">{{ commande.montantTotal | number }} FCFA</div>
+          </div>
+        </a>
+      }
+    </div>
+  }
+</div>

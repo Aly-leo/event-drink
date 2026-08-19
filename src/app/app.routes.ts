@@ -10,8 +10,7 @@ export const routes: Routes = [
   {
     path: 'client',
     canActivate: [roleGuard(Role.CLIENT)],
-    loadComponent: () =>
-      import('./shared/components/coming-soon/coming-soon').then((m) => m.ComingSoon),
+    loadChildren: () => import('./features/client/client.routes').then((m) => m.CLIENT_ROUTES),
   },
   {
     path: 'depot',

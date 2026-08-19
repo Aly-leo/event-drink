@@ -16,5 +16,11 @@ export interface Depot {
   modeRetrait: boolean;
   fraisLivraison: number;
   statut: StatutDepot;
+  visuelUrl?: string | null;
   createdAt: string;
+  distanceKm?: number | null;
+}
+
+export interface DepotDetail extends Depot {
+  produits: import('./produit.model').ProduitDepot[];
 }
