@@ -4,72 +4,10 @@
       <h1 class="h3 fw-bold text-primary mb-0">Catalogue central</h1>
       <p class="text-secondary mb-0">Produits de référence disponibles pour tous les dépôts.</p>
     </div>
-    <button type="button" class="btn btn-primary" (click)="toggleForm()">
-      {{ showForm() ? 'Annuler' : '+ Ajouter un produit' }}
+    <button type="button" class="btn btn-primary rounded-pill px-4" (click)="toggleForm()">
+      + Ajouter un produit
     </button>
   </div>
-
-  @if (showForm()) {
-    <div class="ed-card p-4 mb-4">
-      <h2 class="h6 fw-bold mb-3">{{ editingId() ? 'Modifier le produit' : 'Nouveau produit' }}</h2>
-      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label for="nom" class="form-label">Nom</label>
-            <input id="nom" type="text" class="form-control" formControlName="nom" />
-          </div>
-          <div class="col-md-6">
-            <label for="marque" class="form-label">Marque</label>
-            <input id="marque" type="text" class="form-control" formControlName="marque" />
-          </div>
-          <div class="col-md-4">
-            <label for="contenance" class="form-label">Contenance</label>
-            <input
-              id="contenance"
-              type="text"
-              class="form-control"
-              formControlName="contenance"
-              placeholder="ex. 65cl bouteille"
-            />
-          </div>
-          <div class="col-md-4">
-            <label for="categorie" class="form-label">Catégorie</label>
-            <select id="categorie" class="form-select" formControlName="categorie">
-              @for (cat of Categories; track cat) {
-                <option [value]="cat">{{ categorieLabels[cat] }}</option>
-              }
-            </select>
-          </div>
-          <div class="col-md-4">
-            <label for="visuelUrl" class="form-label">Visuel (URL, optionnel)</label>
-            <input id="visuelUrl" type="text" class="form-control" formControlName="visuelUrl" />
-          </div>
-          <div class="col-12">
-            <div class="form-check">
-              <input
-                id="estConsignable"
-                type="checkbox"
-                class="form-check-input"
-                formControlName="estConsignable"
-              />
-              <label for="estConsignable" class="form-check-label">Consignable</label>
-            </div>
-          </div>
-        </div>
-
-        @if (formError()) {
-          <div class="alert alert-danger py-2 mt-3" role="alert">{{ formError() }}</div>
-        }
-
-        <button type="submit" class="btn btn-primary mt-3" [disabled]="submitting()">
-          @if (submitting()) {
-            <span class="spinner-border spinner-border-sm me-2"></span>
-          }
-          Enregistrer
-        </button>
-      </form>
-    </div>
-  }
 
   @if (loading()) {
     <div class="text-center text-secondary py-5">
@@ -105,13 +43,13 @@
               <td>{{ categorieLabels[produit.categorie] }}</td>
               <td>
                 @if (produit.estConsignable) {
-                  <span class="badge bg-success-subtle text-success-emphasis">Oui</span>
+                  <span class="badge rounded-pill bg-success-subtle text-success-emphasis px-3 py-2">Oui</span>
                 } @else {
-                  <span class="badge bg-secondary-subtle text-secondary-emphasis">Non</span>
+                  <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis px-3 py-2">Non</span>
                 }
               </td>
               <td class="text-end">
-                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="editer(produit)">
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" (click)="editer(produit)">
                   Modifier
                 </button>
               </td>
@@ -122,3 +60,83 @@
     </div>
   }
 </div>
+
+@if (showForm()) {
+  <div
+    class="position-fixed top-0 start-0 w-100 h-100"
+    style="background: rgba(11, 28, 48, 0.4); z-index: 1040;"
+    (click)="toggleForm()"
+  ></div>
+
+  <div
+    class="position-fixed top-0 end-0 h-100 d-flex flex-column"
+    style="width: 420px; max-width: 100vw; background: var(--ed-surface-container-lowest); z-index: 1050; box-shadow: -8px 0 24px rgba(11,28,48,0.15);"
+  >
+    <div class="d-flex justify-content-between align-items-center p-3 border-bottom" style="border-color: var(--ed-border) !important;">
+      <div>
+        <h2 class="h6 fw-bold mb-0">{{ editingId() ? 'Modifier le produit' : 'Nouveau produit' }}</h2>
+        <div class="small text-secondary">Fiche du catalogue central</div>
+      </div>
+      <button type="button" class="btn-close" aria-label="Fermer" (click)="toggleForm()"></button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="d-flex flex-column flex-grow-1 overflow-auto">
+      <div class="p-3 flex-grow-1 overflow-auto">
+        <div class="mb-3">
+          <label for="nom" class="form-label">Nom du produit</label>
+          <input id="nom" type="text" class="form-control" formControlName="nom" placeholder="ex. Mützig Classique" />
+        </div>
+
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label for="marque" class="form-label">Marque</label>
+            <input id="marque" type="text" class="form-control" formControlName="marque" />
+          </div>
+          <div class="col-6">
+            <label for="contenance" class="form-label">Contenance</label>
+            <input
+              id="contenance"
+              type="text"
+              class="form-control"
+              formControlName="contenance"
+              placeholder="65cl bouteille"
+            />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="categorie" class="form-label">Catégorie</label>
+          <select id="categorie" class="form-select" formControlName="categorie">
+            @for (cat of Categories; track cat) {
+              <option [value]="cat">{{ categorieLabels[cat] }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="visuelUrl" class="form-label">Visuel officiel (URL, optionnel)</label>
+          <input id="visuelUrl" type="text" class="form-control" formControlName="visuelUrl" placeholder="https://..." />
+        </div>
+
+        <div class="form-check">
+          <input id="estConsignable" type="checkbox" class="form-check-input" formControlName="estConsignable" />
+          <label for="estConsignable" class="form-check-label">Consignable</label>
+        </div>
+
+        @if (formError()) {
+          <div class="alert alert-danger py-2 mt-3" role="alert">{{ formError() }}</div>
+        }
+      </div>
+
+      <div class="d-flex gap-2 p-3 border-top" style="border-color: var(--ed-border) !important;">
+        <button type="button" class="btn btn-outline-secondary flex-grow-1" (click)="toggleForm()">Annuler</button>
+        <button type="submit" class="btn btn-primary flex-grow-1" [disabled]="submitting()">
+          @if (submitting()) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+          }
+          Enregistrer
+        </button>
+      </div>
+    </form>
+  </div>
+}

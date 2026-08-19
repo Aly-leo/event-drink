@@ -1,7 +1,47 @@
 <div class="container-fluid py-4">
-  <div class="mb-4">
-    <h1 class="h3 fw-bold text-primary mb-0">Registre des plaintes</h1>
-    <p class="text-secondary mb-0">Suivi et résolution des signalements clients par dépôt.</p>
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+    <div>
+      <h1 class="h3 fw-bold text-primary mb-0">Registre des plaintes</h1>
+      <p class="text-secondary mb-0">Suivi et résolution des signalements clients par dépôt.</p>
+    </div>
+  </div>
+
+  <div class="ed-card p-3 mb-3 d-flex flex-wrap align-items-center gap-2">
+    <select
+      class="form-select form-select-sm w-auto"
+      [value]="filterDepotId()"
+      (change)="filterDepotId.set($any($event.target).value)"
+    >
+      <option value="">Tous les dépôts</option>
+      @for (depot of depots(); track depot.id) {
+        <option [value]="depot.id">{{ depot.nomCommerce }}</option>
+      }
+    </select>
+
+    <select
+      class="form-select form-select-sm w-auto"
+      [value]="filterStatut()"
+      (change)="filterStatut.set($any($event.target).value)"
+    >
+      <option value="">Tous les statuts</option>
+      <option [value]="StatutPlainte.EN_ATTENTE">En attente</option>
+      <option [value]="StatutPlainte.RESOLUE">Résolue</option>
+    </select>
+
+    <select
+      class="form-select form-select-sm w-auto"
+      [value]="filterMotif()"
+      (change)="filterMotif.set($any($event.target).value)"
+    >
+      <option value="">Tous les motifs</option>
+      @for (motif of motifLabels | keyvalue; track motif.key) {
+        <option [value]="motif.key">{{ motif.value }}</option>
+      }
+    </select>
+
+    <button type="button" class="btn btn-sm btn-outline-secondary ms-auto" (click)="clearFilters()">
+      Réinitialiser
+    </button>
   </div>
 
   @if (error()) {
@@ -20,6 +60,9 @@
     <div class="row g-3">
       <div class="col-lg-8">
         <div class="ed-card p-0">
+          <div class="px-3 pt-3 small text-secondary">
+            {{ filtered().length }} résultat{{ filtered().length > 1 ? 's' : '' }}
+          </div>
           <table class="table table-hover mb-0 align-middle">
             <thead>
               <tr>
@@ -31,7 +74,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (plainte of plaintes(); track plainte.id) {
+              @for (plainte of filtered(); track plainte.id) {
                 <tr
                   role="button"
                   [class.table-active]="selectedId() === plainte.id"
@@ -39,15 +82,19 @@
                 >
                   <td>
                     @if (plainte.statut === StatutPlainte.RESOLUE) {
-                      <span class="badge bg-success-subtle text-success-emphasis">Résolue</span>
+                      <span class="badge rounded-pill bg-success-subtle text-success-emphasis px-3 py-2">Résolue</span>
                     } @else {
-                      <span class="badge bg-warning-subtle text-warning-emphasis">En attente</span>
+                      <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis px-3 py-2">En attente</span>
                     }
                   </td>
                   <td>{{ plainte.client.nom }}</td>
                   <td>{{ plainte.depot.nomCommerce }}</td>
                   <td>{{ plainte.referenceCommande ?? '—' }}</td>
                   <td>{{ motifLabels[plainte.motif] }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="text-center text-secondary py-4">Aucun résultat pour ces filtres.</td>
                 </tr>
               }
             </tbody>
@@ -58,24 +105,57 @@
       <div class="col-lg-4">
         @if (selected(); as plainte) {
           <div class="ed-card p-3">
-            <div class="small text-secondary mb-1">Dossier sélectionné</div>
-            <div class="fw-bold mb-3">{{ plainte.id }}</div>
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <div class="small text-secondary">Dossier sélectionné</div>
+                <div class="fw-bold small font-monospace">#{{ plainte.id.slice(-8) }}</div>
+              </div>
+              @if (plainte.statut === StatutPlainte.RESOLUE) {
+                <span class="badge rounded-pill bg-success-subtle text-success-emphasis px-3 py-2">Résolue</span>
+              } @else {
+                <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis px-3 py-2">En attente</span>
+              }
+            </div>
 
-            <div class="small text-secondary">Motif</div>
-            <div class="mb-3">{{ motifLabels[plainte.motif] }}</div>
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <span
+                class="d-inline-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
+                style="width: 28px; height: 28px; background: var(--ed-surface-container-high);"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ed-primary)" stroke-width="2">
+                  <path d="M12 9v4" />
+                  <path d="M12 17h.01" />
+                  <circle cx="12" cy="12" r="9" />
+                </svg>
+              </span>
+              <span class="fw-semibold">{{ motifLabels[plainte.motif] }}</span>
+            </div>
 
             @if (plainte.referenceCommande) {
               <div class="small text-secondary">Référence facture</div>
               <div class="mb-3">{{ plainte.referenceCommande }}</div>
             }
 
-            <div class="small text-secondary">Message</div>
-            <p class="mb-3">{{ plainte.message }}</p>
+            <div class="small text-secondary mb-1">Message complet</div>
+            <blockquote
+              class="mb-3 p-2 small fst-italic"
+              style="background: var(--ed-surface-container-low); border-left: 3px solid var(--ed-outline-variant); border-radius: 0.5rem;"
+            >
+              "{{ plainte.message }}"
+            </blockquote>
 
             @if (plainte.photoUrl) {
               <div class="small text-secondary mb-1">Preuve</div>
               <img [src]="plainte.photoUrl" alt="Preuve jointe" class="img-fluid rounded mb-3" />
             }
+
+            <div
+              class="p-2 mb-3 rounded-3 small"
+              style="background: var(--ed-surface-container-low);"
+            >
+              <div class="text-secondary">Statut du dépôt</div>
+              <div class="fw-semibold">{{ plainte.depot.nomCommerce }}</div>
+            </div>
 
             @if (plainte.actionAdmin) {
               <div class="alert alert-secondary py-2 small">
@@ -85,12 +165,12 @@
 
             <hr />
 
-            <div class="small text-secondary mb-2">Actions admin</div>
+            <div class="small text-secondary mb-2 fw-semibold">Panneau d'action admin</div>
             <div class="d-grid gap-2">
               @if (plainte.statut === StatutPlainte.EN_ATTENTE) {
                 <button
                   type="button"
-                  class="btn btn-outline-success btn-sm"
+                  class="btn btn-outline-success btn-sm rounded-pill"
                   [disabled]="actionEnCours()"
                   (click)="resoudre(plainte)"
                 >
@@ -99,7 +179,8 @@
               }
               <button
                 type="button"
-                class="btn btn-outline-warning btn-sm"
+                class="btn btn-sm rounded-pill text-white"
+                style="background: #b45309;"
                 [disabled]="actionEnCours()"
                 (click)="appliquerAction(plainte, ActionAdminPlainte.AVERTISSEMENT)"
               >
@@ -107,7 +188,7 @@
               </button>
               <button
                 type="button"
-                class="btn btn-outline-secondary btn-sm"
+                class="btn btn-outline-secondary btn-sm rounded-pill"
                 [disabled]="actionEnCours()"
                 (click)="appliquerAction(plainte, ActionAdminPlainte.SUSPENSION_TEMPORAIRE)"
               >
@@ -115,7 +196,7 @@
               </button>
               <button
                 type="button"
-                class="btn btn-danger btn-sm"
+                class="btn btn-danger btn-sm rounded-pill"
                 [disabled]="actionEnCours()"
                 (click)="appliquerAction(plainte, ActionAdminPlainte.BANNISSEMENT)"
               >

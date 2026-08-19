@@ -1,12 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { AdminService, AdminStats } from '../../../core/services/admin.service';
 import { Depot, StatutDepot } from '../../../core/models/depot.model';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, DatePipe],
   templateUrl: './dashboard.html',
 })
 export class Dashboard {
