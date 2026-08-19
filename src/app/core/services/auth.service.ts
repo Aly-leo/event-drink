@@ -20,6 +20,13 @@ export interface RegisterPayload {
   role: Role.CLIENT | Role.DEPOT;
 }
 
+export interface UpdateProfilePayload {
+  nom?: string;
+  email?: string;
+  telephone?: string;
+  adresse?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   readonly currentUser = signal<User | null>(this.readStoredUser());
@@ -36,6 +43,15 @@ export class AuthService {
     return this.http
       .post<AuthResponse>(`${environment.apiUrl}/auth/register`, payload)
       .pipe(tap((res) => this.setSession(res)));
+  }
+
+  updateProfile(payload: UpdateProfilePayload): Observable<User> {
+    return this.http.patch<User>(`${environment.apiUrl}/auth/me`, payload).pipe(
+      tap((user) => {
+        localStorage.setItem(USER_KEY, JSON.stringify(user));
+        this.currentUser.set(user);
+      })
+    );
   }
 
   logout(): void {
