@@ -9,6 +9,12 @@
 
 @media (min-width: 992px) {
   .admin-sidebar {
+    position: static !important;
     transform: none !important;
+    // h-100 (height:100%) se resout contre le parent flex qui n'a qu'un
+    // min-height -> laisser align-items:stretch (defaut de d-flex) etirer
+    // la sidebar sur toute la hauteur de la ligne.
+    height: auto !important;
+    align-self: stretch;
   }
 }
