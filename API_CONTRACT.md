@@ -115,20 +115,25 @@ Liste des dépôts `statut: VALIDE` uniquement. `lat`/`lng`/`rayonKm` optionnels
     "modeRetrait": true,
     "fraisLivraison": 500,
     "statut": "VALIDE",
+    "visuelUrl": null,
     "createdAt": "2026-08-14T14:01:49.741Z",
-    "distanceKm": 1.2
+    "distanceKm": 1.2,
+    "noteMoyenne": 4.5,
+    "nombreAvis": 2
   }
 ]
 ```
-`distanceKm` vaut `null` si `lat`/`lng` non fournis.
+`distanceKm` vaut `null` si `lat`/`lng` non fournis. `noteMoyenne`/`nombreAvis` agrégés depuis `Avis` (`noteMoyenne: null` si `nombreAvis: 0`).
 
 ### `GET /depots/:id`
-Détail d'un dépôt (n'importe quel statut) + son catalogue. 404 si introuvable.
+Détail d'un dépôt (n'importe quel statut) + son catalogue + ses avis. 404 si introuvable.
 ```json
 {
   "id": "clx...",
   "nomCommerce": "Depot Centrale Akwa",
   "...": "...",
+  "noteMoyenne": 4.5,
+  "nombreAvis": 2,
   "produits": [
     {
       "id": "clx...",
@@ -138,6 +143,15 @@ Détail d'un dépôt (n'importe quel statut) + son catalogue. 404 si introuvable
       "montantConsigne": 150,
       "disponible": true,
       "produit": { "id": "clx...", "nom": "Castel Beer", "...": "..." }
+    }
+  ],
+  "avis": [
+    {
+      "id": "clx...",
+      "note": 5,
+      "commentaire": "Très bon service, livraison rapide.",
+      "createdAt": "2026-08-19T16:42:18.460Z",
+      "client": { "nom": "Client Démo" }
     }
   ]
 }
@@ -309,9 +323,11 @@ Réponse `201` — `Commande` complète :
       "montantConsigneUnitaire": 150,
       "consigne": { "id": "clx...", "montant": 300, "statut": "BLOQUEE" }
     }
-  ]
+  ],
+  "avis": null
 }
 ```
+`avis` est `null` tant qu'aucun avis n'a été laissé pour cette commande, sinon `{ id, note, commentaire }` (voir section Avis).
 `montantTotal` = Σ(prix×qté) + Σ(consigne×qté) + frais de livraison (si mode LIVRAISON). Une `Consigne` (`BLOQUEE`) est créée pour chaque ligne dont `montantConsigneUnitaire > 0`. `referenceUnique` au format `FAC-{année}-{4 chiffres}`, garanti unique (retry automatique sur collision).
 
 ### `GET /commandes/mine` — rôle `CLIENT`
@@ -328,6 +344,39 @@ Commandes reçues par le dépôt du compte connecté (résolu via `ownerId`, jam
 { "statut": "CONFIRMEE" }
 ```
 Vérifie la propriété du dépôt et que la transition respecte la séquence du `mode` (`RETRAIT` : `EN_ATTENTE → CONFIRMEE → PRETE_A_RETIRER → TERMINEE` ; `LIVRAISON` : `EN_ATTENTE → CONFIRMEE → EN_PREPARATION → EN_ROUTE → LIVREE`). 400 si la transition saute une étape.
+
+---
+
+## Avis — implémenté [bonus]
+
+Un avis note un dépôt à l'issue d'une commande terminée (`TERMINEE` ou `LIVREE`). Un seul avis par commande (`commandeId` unique).
+
+### `POST /avis` — rôle `CLIENT`
+```json
+{
+  "commandeId": "clx...",
+  "note": 5,
+  "commentaire": "Très bon service, livraison rapide."
+}
+```
+`note` entier entre 1 et 5, `commentaire` optionnel. Le `depotId` est résolu depuis la commande, jamais depuis le body. Réponse `201` :
+```json
+{
+  "id": "clx...",
+  "clientId": "clx...",
+  "depotId": "clx...",
+  "commandeId": "clx...",
+  "note": 5,
+  "commentaire": "Très bon service, livraison rapide.",
+  "createdAt": "2026-08-19T16:42:18.460Z"
+}
+```
+Erreurs :
+- `404` — commande introuvable ou n'appartenant pas au client connecté (jamais 403, pour ne pas confirmer l'existence de la commande à autrui).
+- `400` — la commande n'est pas encore terminée (`statut` autre que `TERMINEE`/`LIVREE`).
+- `409` — un avis existe déjà pour cette commande.
+
+Les avis d'un dépôt sont consultables via `GET /depots/:id` (champ `avis[]`), et les agrégats `noteMoyenne`/`nombreAvis` apparaissent sur `GET /depots` et `GET /depots/:id` (voir section Dépôts).
 
 ---
 
