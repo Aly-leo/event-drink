@@ -12,47 +12,59 @@
       </div>
     </div>
 
-    <div class="d-flex gap-2 overflow-auto mb-4 pb-2">
-      @for (filtre of filtres; track filtre.valeur) {
-        <button class="btn btn-sm rounded-pill text-nowrap" [ngClass]="filtreStatut() === filtre.valeur ? 'btn-primary' : 'btn-outline-secondary'" (click)="changerFiltre(filtre.valeur)">
-          {{ filtre.label }}
-          @if (filtre.valeur === 'EN_ATTENTE' && nbEnAttente() > 0) { <span class="badge bg-white text-danger ms-1">{{ nbEnAttente() }}</span> }
-        </button>
-      }
-    </div>
+    @if (loading()) {
+      <div class="text-center text-secondary py-5">
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        Chargement des commandes...
+      </div>
+    } @else if (error()) {
+      <div class="alert alert-danger" role="alert">
+        {{ error() }}
+        <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">Réessayer</button>
+      </div>
+    } @else {
+      <div class="d-flex gap-2 overflow-auto mb-4 pb-2">
+        @for (filtre of filtres; track filtre.valeur) {
+          <button class="btn btn-sm rounded-pill text-nowrap" [ngClass]="filtreStatut() === filtre.valeur ? 'btn-primary' : 'btn-outline-secondary'" (click)="changerFiltre(filtre.valeur)">
+            {{ filtre.label }}
+            @if (filtre.valeur === 'EN_ATTENTE' && nbEnAttente() > 0) { <span class="badge bg-white text-danger ms-1">{{ nbEnAttente() }}</span> }
+          </button>
+        }
+      </div>
 
-    <div class="row g-3">
-      @for (commande of commandesFiltrees(); track commande.id) {
-        <div class="col-12 col-lg-6">
-          <a [routerLink]="['/depot/commandes', commande.id]" class="card shadow-sm border-0 h-100 text-decoration-none text-reset {{ getBorderClass(commande.statut) }}" [class.opacity-75]="commande.statut === 'LIVREE' || commande.statut === 'TERMINEE'">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                  <div class="d-flex align-items-center gap-2 mb-1">
-                    <span class="fw-bold h5 mb-0">{{ commande.reference }}</span>
-                    <span class="badge {{ getBadgeClass(commande.statut) }}">{{ labelStatut(commande.statut) }}</span>
+      <div class="row g-3">
+        @for (commande of commandesFiltrees(); track commande.id) {
+          <div class="col-12 col-lg-6">
+            <a [routerLink]="['/depot/commandes', commande.id]" class="card shadow-sm border-0 h-100 text-decoration-none text-reset {{ getBorderClass(commande.statut) }}" [class.opacity-75]="commande.statut === 'LIVREE' || commande.statut === 'TERMINEE'">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                  <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                      <span class="fw-bold h5 mb-0">{{ commande.referenceUnique }}</span>
+                      <span class="badge {{ getBadgeClass(commande.statut) }}">{{ labelStatut(commande.statut) }}</span>
+                    </div>
+                    <div class="text-secondary">{{ commande.client.nom }}</div>
                   </div>
-                  <div class="text-secondary">{{ commande.client }}</div>
+                  <div class="text-end">
+                    <div class="fw-bold h5 mb-0">{{ commande.montantTotal | number:'1.0-0' }} FCFA</div>
+                    <div class="text-secondary small"><i class="bi bi-clock me-1"></i>{{ commande.createdAt | date: 'dd/MM HH:mm' }}</div>
+                  </div>
                 </div>
-                <div class="text-end">
-                  <div class="fw-bold h5 mb-0">{{ commande.montant | number:'1.0-0' }} FCFA</div>
-                  <div class="text-secondary small"><i class="bi bi-clock me-1"></i>{{ commande.heure }}</div>
+                <div class="d-flex justify-content-between align-items-center border-top pt-2 mt-3">
+                  <div class="d-flex gap-3 text-secondary small">
+                    <span><i class="bi" [ngClass]="commande.mode === 'LIVRAISON' ? 'bi-truck' : 'bi-shop'"></i> {{ commande.mode === 'LIVRAISON' ? 'Livraison' : 'Retrait' }}</span>
+                    <span><i class="bi bi-box me-1"></i>{{ commande.lignes.length }} article(s)</span>
+                  </div>
+                  <i class="bi bi-arrow-right text-primary fs-5"></i>
                 </div>
               </div>
-              <div class="d-flex justify-content-between align-items-center border-top pt-2 mt-3">
-                <div class="d-flex gap-3 text-secondary small">
-                  <span><i class="bi" [ngClass]="commande.type === 'Livraison' ? 'bi-truck' : 'bi-shop'"></i> {{ commande.type }}</span>
-                  <span><i class="bi bi-box me-1"></i>{{ commande.nombreArticles }} articles</span>
-                </div>
-                <i class="bi bi-arrow-right text-primary fs-5"></i>
-              </div>
-            </div>
-          </a>
-        </div>
-      } @empty {
-        <div class="col-12 text-center py-5 text-secondary"><i class="bi bi-inbox fs-1 d-block mb-2"></i>Aucune commande ne correspond aux critères.</div>
-      }
-    </div>
+            </a>
+          </div>
+        } @empty {
+          <div class="col-12 text-center py-5 text-secondary"><i class="bi bi-inbox fs-1 d-block mb-2"></i>Aucune commande ne correspond aux critères.</div>
+        }
+      </div>
+    }
 
   </div>
 </div>

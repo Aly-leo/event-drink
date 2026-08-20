@@ -1,12 +1,15 @@
 import { Routes } from '@angular/router';
+import { depotHasProfileGuard, depotNoProfileGuard } from '../../core/guards/depot-profile.guard';
 
 export const DEPOT_ROUTES: Routes = [
   {
     path: 'onboarding',
+    canActivate: [depotNoProfileGuard],
     loadComponent: () => import('./pages/depot-onboarding/depot-onboarding').then((m) => m.DepotOnboarding),
   },
   {
     path: '',
+    canActivate: [depotHasProfileGuard],
     loadComponent: () => import('./layout/depot-layout/depot-layout').then((m) => m.DepotLayout),
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },

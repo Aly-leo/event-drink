@@ -1,7 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Depot } from '../../depot';
+import { FormsModule, NgForm } from '@angular/forms';
+import { Router } from '@angular/router';
+import { DepotsService } from '../../../../core/services/depots.service';
+import { GeolocationService } from '../../../../core/services/geolocation.service';
 
 @Component({
   selector: 'app-depot-onboarding',
@@ -11,6 +13,10 @@ import { Depot } from '../../depot';
   styleUrl: './depot-onboarding.scss',
 })
 export class DepotOnboarding {
+  private readonly depotsService = inject(DepotsService);
+  private readonly geolocationService = inject(GeolocationService);
+  private readonly router = inject(Router);
+
   fichierSelectionne = signal<File | null>(null);
   envoiEnCours = signal(false);
   erreur = signal<string | null>(null);
@@ -18,12 +24,11 @@ export class DepotOnboarding {
   modele = {
     nomDepot: '',
     telephone: '',
+    adresse: '',
     retraitSurPlace: true,
     livraisonDomicile: true,
     fraisLivraison: 1500,
   };
-
-  constructor(private depotService: Depot) {}
 
   onFichierChange(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -36,7 +41,7 @@ export class DepotOnboarding {
     console.log('Brouillon :', this.modele, this.fichierSelectionne());
   }
 
-  onSubmit(formulaire: any) {
+  async onSubmit(formulaire: NgForm) {
     if (formulaire.invalid) {
       return;
     }
@@ -44,27 +49,28 @@ export class DepotOnboarding {
     this.erreur.set(null);
     this.envoiEnCours.set(true);
 
+    const { coords } = await this.geolocationService.getPosition();
+
     const payload = {
       nomCommerce: this.modele.nomDepot,
       telephone: this.modele.telephone,
-      adresse: 'À définir via la carte',
-      latitude: 4.0511,
-      longitude: 9.7015,
+      adresse: this.modele.adresse,
+      latitude: coords.lat,
+      longitude: coords.lng,
       modeLivraison: this.modele.livraisonDomicile,
       modeRetrait: this.modele.retraitSurPlace,
       fraisLivraison: this.modele.fraisLivraison,
     };
 
-    this.depotService.onboarding(payload).subscribe({
-      next: (res) => {
-        console.log('Dépôt créé avec succès :', res);
+    this.depotsService.createMyDepot(payload).subscribe({
+      next: () => {
         this.envoiEnCours.set(false);
+        this.router.navigateByUrl('/depot/dashboard');
       },
       error: (err) => {
-        console.error('Erreur onboarding :', err);
         this.erreur.set(err.error?.message ?? 'Une erreur est survenue.');
         this.envoiEnCours.set(false);
-      }
+      },
     });
   }
 }

@@ -6,11 +6,29 @@
         <h1 class="h4 fw-bold mb-1">Paramètres du dépôt</h1>
         <p class="text-secondary mb-0">Gérez les informations et les modalités de service.</p>
       </div>
-      <button (click)="enregistrer()" class="btn btn-primary d-flex align-items-center gap-2">
-        <i class="bi bi-floppy"></i> Enregistrer
+      <button (click)="enregistrer()" class="btn btn-primary d-flex align-items-center gap-2" [disabled]="loading() || submitting()">
+        @if (submitting()) {
+          <span class="spinner-border spinner-border-sm"></span>
+        } @else {
+          <i class="bi bi-floppy"></i>
+        }
+        Enregistrer
       </button>
     </div>
 
+    @if (error()) {
+      <div class="alert alert-danger" role="alert">{{ error() }}</div>
+    }
+    @if (succes()) {
+      <div class="alert alert-success" role="alert">Paramètres enregistrés.</div>
+    }
+
+    @if (loading()) {
+      <div class="text-center text-secondary py-5">
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        Chargement des paramètres...
+      </div>
+    } @else {
     <div class="row g-4">
       <div class="col-lg-7">
         <div class="d-flex flex-column gap-4">
@@ -28,7 +46,11 @@
                   <div class="text-center"><i class="bi bi-geo-alt-fill fs-3 text-primary"></i><p class="small mb-0 mt-1 fw-semibold">{{ adresse() }}</p></div>
                 </div>
               </div>
-              <div class="mb-0"><label class="form-label text-secondary fw-medium small">Description interne</label><textarea class="form-control" rows="3" [ngModel]="description()" (ngModelChange)="description.set($event)"></textarea></div>
+              <div class="mb-0">
+                <label class="form-label text-secondary fw-medium small">Description interne</label>
+                <textarea class="form-control" rows="3" [ngModel]="description()" (ngModelChange)="description.set($event)"></textarea>
+                <div class="form-text">Pas encore enregistrée côté serveur.</div>
+              </div>
             </div>
           </div>
 
@@ -83,12 +105,13 @@
             </div>
             <div class="alert alert-info d-flex align-items-start gap-2 mb-0 mt-3 border-0 rounded-3 p-3">
               <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
-              <div class="small">Les clients ne pourront pas choisir un créneau de retrait hors de ces horaires.</div>
+              <div class="small">Aperçu uniquement pour l'instant — les horaires détaillés par jour ne sont pas encore enregistrés côté serveur.</div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    }
 
   </div>
 </div>

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Commande, ModeReception } from '../models/commande.model';
+import { Commande, ModeReception, StatutCommande } from '../models/commande.model';
 
 export interface CreateCommandePayload {
   depotId: string;
@@ -26,5 +26,13 @@ export class CommandesService {
 
   getOne(id: string): Observable<Commande> {
     return this.http.get<Commande>(`${environment.apiUrl}/commandes/${id}`);
+  }
+
+  getForMyDepot(): Observable<Commande[]> {
+    return this.http.get<Commande[]>(`${environment.apiUrl}/commandes/depot/mine`);
+  }
+
+  updateStatut(id: string, statut: StatutCommande): Observable<Commande> {
+    return this.http.patch<Commande>(`${environment.apiUrl}/commandes/${id}/statut`, { statut });
   }
 }

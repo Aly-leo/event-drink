@@ -1,21 +1,10 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-export type CategorieProduit = 'BIERE_LOCALE' | 'VIN' | 'SPIRITUEUX' | 'SOFT' | 'MATERIEL';
-
-export interface Produit {
-  id: number;
-  nom: string;
-  marque: string;
-  format: string;
-  categorie: CategorieProduit;
-  consignable: boolean;
-  consignePrix?: number;
-  prix: number;
-  disponible: boolean;
-  imageUrl: string;
-}
+import { forkJoin } from 'rxjs';
+import { CatalogueService } from '../../../../core/services/catalogue.service';
+import { DepotsService } from '../../../../core/services/depots.service';
+import { CategorieProduit, Produit, ProduitDepot } from '../../../../core/models/produit.model';
 
 interface OptionCategorie {
   valeur: CategorieProduit | 'TOUTES';
@@ -30,96 +19,164 @@ interface OptionCategorie {
   styleUrl: './depot-catalogues.scss',
 })
 export class DepotCatalogues {
+  private readonly catalogueService = inject(CatalogueService);
+  private readonly depotsService = inject(DepotsService);
+
+  readonly categorieLabels: Record<CategorieProduit, string> = {
+    [CategorieProduit.BIERE_LOCALE]: 'Bière locale',
+    [CategorieProduit.BIERE_IMPORTEE]: 'Bière importée',
+    [CategorieProduit.CHAMPAGNE_EFFERVESCENT]: 'Champagne / effervescent',
+    [CategorieProduit.VIN]: 'Vin',
+    [CategorieProduit.SANS_ALCOOL]: 'Sans alcool',
+  };
+
+  readonly categories: OptionCategorie[] = [
+    { valeur: 'TOUTES', label: 'Toutes les catégories' },
+    ...Object.values(CategorieProduit).map((valeur) => ({ valeur, label: this.categorieLabels[valeur] })),
+  ];
+
+  loading = signal(true);
+  error = signal<string | null>(null);
+
   recherche = signal('');
   categorieActive = signal<CategorieProduit | 'TOUTES'>('TOUTES');
   statutActif = signal<'TOUS' | 'DISPONIBLE' | 'RUPTURE'>('TOUS');
 
-  categories: OptionCategorie[] = [
-    { valeur: 'TOUTES', label: 'Toutes les catégories' },
-    { valeur: 'BIERE_LOCALE', label: 'Bière locale' },
-    { valeur: 'VIN', label: 'Vin' },
-    { valeur: 'SPIRITUEUX', label: 'Spiritueux' },
-    { valeur: 'SOFT', label: 'Soft / Gazeuse' },
-    { valeur: 'MATERIEL', label: 'Matériel' },
-  ];
-
-  imageParDefaut = 'https://placehold.co/64x64/EA580C/FFFFFF?text=%20';
-  fraisLivraison = signal(15000);
-
-  appliquerFraisLivraison() {
-    console.log('Frais de livraison appliqué :', this.fraisLivraison());
-  }
-
-  produits = signal<Produit[]>([
-    { id: 1, nom: 'Heineken Blonde', marque: 'Heineken', format: 'Fût 30L', categorie: 'BIERE_LOCALE', consignable: true, consignePrix: 20000, prix: 55000, disponible: true, imageUrl: 'https://placehold.co/64x64/EA580C/FFFFFF?text=H' },
-    { id: 2, nom: 'Château Rouge AOP', marque: 'Château Rouge', format: 'Caisse 6x75cl', categorie: 'VIN', consignable: false, prix: 28000, disponible: true, imageUrl: 'https://placehold.co/64x64/7C2D12/FFFFFF?text=V' },
-    { id: 3, nom: '33 Export', marque: 'SABC', format: 'Casier de 24', categorie: 'BIERE_LOCALE', consignable: true, consignePrix: 200, prix: 12000, disponible: false, imageUrl: 'https://placehold.co/64x64/EA580C/FFFFFF?text=33' },
-    { id: 4, nom: 'Coca-Cola', marque: 'Coca-Cola', format: 'Casier de 24 x 25cl', categorie: 'SOFT', consignable: true, consignePrix: 150, prix: 9500, disponible: true, imageUrl: 'https://placehold.co/64x64/DC2626/FFFFFF?text=C' },
-    { id: 5, nom: "Jack Daniel's", marque: "Jack Daniel's", format: 'Bouteille 70cl', categorie: 'SPIRITUEUX', consignable: false, prix: 42000, disponible: true, imageUrl: 'https://placehold.co/64x64/1E293B/FFFFFF?text=JD' },
-  ]);
+  catalogueCentral = signal<Produit[]>([]);
+  mesProduits = signal<ProduitDepot[]>([]);
 
   produitsFiltres = computed(() => {
     const terme = this.recherche().trim().toLowerCase();
     const cat = this.categorieActive();
     const statut = this.statutActif();
-    return this.produits().filter(p => {
-      const matchTerme = !terme || p.nom.toLowerCase().includes(terme) || p.marque.toLowerCase().includes(terme);
-      const matchCat = cat === 'TOUTES' ? true : p.categorie === cat;
-      const matchStatut = statut === 'TOUS' ? true : (statut === 'DISPONIBLE' ? p.disponible : !p.disponible);
+    return this.mesProduits().filter((pd) => {
+      const matchTerme =
+        !terme || pd.produit.nom.toLowerCase().includes(terme) || pd.produit.marque.toLowerCase().includes(terme);
+      const matchCat = cat === 'TOUTES' ? true : pd.produit.categorie === cat;
+      const matchStatut = statut === 'TOUS' ? true : statut === 'DISPONIBLE' ? pd.disponible : !pd.disponible;
       return matchTerme && matchCat && matchStatut;
     });
   });
 
-  labelCategorie(cat: CategorieProduit | 'TOUTES'): string {
-    return this.categories.find(c => c.valeur === cat)?.label ?? cat;
-  }
+  /** Produits du catalogue central pas encore ajoutés à ce dépôt. */
+  produitsDisponiblesAjout = computed(() => {
+    const dejaAjoutes = new Set(this.mesProduits().map((pd) => pd.produitId));
+    return this.catalogueCentral().filter((p) => !dejaAjoutes.has(p.id));
+  });
+
+  produitSelectionne = computed(() => this.catalogueCentral().find((p) => p.id === this.formulaire.produitId) ?? null);
 
   modalOuverte = signal(false);
   modeEdition = signal(false);
-  produitIdEnEdition: number | null = null;
-  formulaire: Omit<Produit, 'id'> = this.formulaireVide();
+  submitting = signal(false);
+  formError = signal<string | null>(null);
+  private produitDepotEnEdition: ProduitDepot | null = null;
 
-  private formulaireVide(): Omit<Produit, 'id'> {
-    return { nom: '', marque: '', format: '', categorie: 'BIERE_LOCALE', consignable: false, consignePrix: 0, prix: 0, disponible: true, imageUrl: '' };
+  formulaire = { produitId: '', prix: 0, montantConsigne: 0, disponible: true };
+
+  constructor() {
+    this.load();
   }
 
-  ouvrirAjout() {
+  load(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    forkJoin([this.catalogueService.getProduits(), this.depotsService.getMyProduits()]).subscribe({
+      next: ([catalogue, mesProduits]) => {
+        this.catalogueCentral.set(catalogue);
+        this.mesProduits.set(mesProduits);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('Impossible de charger le catalogue.');
+        this.loading.set(false);
+      },
+    });
+  }
+
+  labelCategorie(cat: CategorieProduit | 'TOUTES'): string {
+    return this.categories.find((c) => c.valeur === cat)?.label ?? cat;
+  }
+
+  ouvrirAjout(): void {
     this.modeEdition.set(false);
-    this.produitIdEnEdition = null;
-    this.formulaire = this.formulaireVide();
+    this.produitDepotEnEdition = null;
+    this.formulaire = { produitId: '', prix: 0, montantConsigne: 0, disponible: true };
+    this.formError.set(null);
     this.modalOuverte.set(true);
   }
 
-  ouvrirModification(id: number) {
-    const produit = this.produits().find(p => p.id === id);
-    if (!produit) return;
+  ouvrirModification(pd: ProduitDepot): void {
     this.modeEdition.set(true);
-    this.produitIdEnEdition = id;
-    const { id: _id, ...reste } = produit;
-    this.formulaire = { ...reste };
+    this.produitDepotEnEdition = pd;
+    this.formulaire = {
+      produitId: pd.produitId,
+      prix: pd.prix,
+      montantConsigne: pd.montantConsigne,
+      disponible: pd.disponible,
+    };
+    this.formError.set(null);
     this.modalOuverte.set(true);
   }
 
-  fermerModal() { this.modalOuverte.set(false); }
+  fermerModal(): void {
+    this.modalOuverte.set(false);
+  }
 
-  enregistrerProduit() {
-    if (!this.formulaire.nom.trim()) return;
-    if (!this.formulaire.consignable) this.formulaire.consignePrix = 0;
+  enregistrer(): void {
+    this.formError.set(null);
 
-    if (this.modeEdition() && this.produitIdEnEdition !== null) {
-      this.produits.set(this.produits().map(p => p.id === this.produitIdEnEdition ? { id: p.id, ...this.formulaire } : p));
-    } else {
-      const nouvelId = Math.max(0, ...this.produits().map(p => p.id)) + 1;
-      this.produits.set([...this.produits(), { id: nouvelId, ...this.formulaire }]);
+    if (this.modeEdition() && this.produitDepotEnEdition) {
+      this.submitting.set(true);
+      this.depotsService
+        .updateMyProduit(this.produitDepotEnEdition.id, {
+          prix: this.formulaire.prix,
+          montantConsigne: this.formulaire.montantConsigne,
+          disponible: this.formulaire.disponible,
+        })
+        .subscribe({
+          next: (updated) => {
+            this.mesProduits.update((list) => list.map((p) => (p.id === updated.id ? updated : p)));
+            this.submitting.set(false);
+            this.fermerModal();
+          },
+          error: (err) => {
+            this.formError.set(err.error?.message ?? "Impossible d'enregistrer les modifications.");
+            this.submitting.set(false);
+          },
+        });
+      return;
     }
-    this.fermerModal();
+
+    if (!this.formulaire.produitId) {
+      this.formError.set('Choisis un produit du catalogue central.');
+      return;
+    }
+
+    this.submitting.set(true);
+    this.depotsService
+      .addMyProduit({
+        produitId: this.formulaire.produitId,
+        prix: this.formulaire.prix,
+        montantConsigne: this.formulaire.montantConsigne,
+        disponible: this.formulaire.disponible,
+      })
+      .subscribe({
+        next: (created) => {
+          this.mesProduits.update((list) => [...list, created]);
+          this.submitting.set(false);
+          this.fermerModal();
+        },
+        error: (err) => {
+          this.formError.set(err.error?.message ?? "Impossible d'ajouter ce produit.");
+          this.submitting.set(false);
+        },
+      });
   }
 
-  toggleDisponibilite(id: number) {
-    this.produits.set(this.produits().map(p => p.id === id ? { ...p, disponible: !p.disponible } : p));
-  }
-
-  supprimerProduit(id: number) {
-    this.produits.set(this.produits().filter(p => p.id !== id));
+  toggleDisponibilite(pd: ProduitDepot): void {
+    this.depotsService.updateMyProduit(pd.id, { disponible: !pd.disponible }).subscribe({
+      next: (updated) => this.mesProduits.update((list) => list.map((p) => (p.id === updated.id ? updated : p))),
+    });
   }
 }

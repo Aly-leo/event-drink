@@ -4,132 +4,113 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
       <div>
         <h1 class="h4 fw-bold mb-1">Catalogue</h1>
-        <p class="text-secondary mb-0">Gérez vos produits, tarifs et disponibilités de consigne.</p>
+        <p class="text-secondary mb-0">Gérez les produits, tarifs et consignes proposés par votre dépôt.</p>
       </div>
       <button type="button" class="btn btn-primary d-flex align-items-center gap-2" (click)="ouvrirAjout()">
         <i class="bi bi-plus-lg"></i> Ajouter un produit
       </button>
     </div>
 
-    <div class="card shadow-sm mb-4">
-      <div class="card-body d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
-        <div class="d-flex align-items-center gap-3">
-          <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary flex-shrink-0" style="width:48px;height:48px;">
-            <i class="bi bi-truck fs-5"></i>
-          </div>
-          <div>
-            <h2 class="h6 mb-1">Frais de livraison global</h2>
-            <p class="mb-0 small text-secondary">Coût standard appliqué aux commandes de ce dépôt.</p>
-          </div>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-          <div class="input-group" style="max-width:180px;">
-            <input type="number" class="form-control" min="0" step="100" [(ngModel)]="fraisLivraison">
-            <span class="input-group-text">FCFA</span>
-          </div>
-          <button type="button" class="btn btn-outline-primary flex-shrink-0" (click)="appliquerFraisLivraison()">Appliquer</button>
-        </div>
+    @if (loading()) {
+      <div class="text-center text-secondary py-5">
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        Chargement du catalogue...
       </div>
-    </div>
-
-    <div class="card shadow-sm mb-3">
-      <div class="card-body d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-        <div class="input-group" style="max-width:340px;">
-          <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-          <input type="text" class="form-control" placeholder="Rechercher un produit ou une marque..." [ngModel]="recherche()" (ngModelChange)="recherche.set($event)">
-        </div>
-        <div class="d-flex flex-wrap gap-2">
-          <div class="dropdown">
-            <button class="btn btn-light border dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
-              <i class="bi bi-funnel"></i>{{ categorieActive() === 'TOUTES' ? 'Catégorie' : labelCategorie(categorieActive()) }}
-            </button>
-            <ul class="dropdown-menu">
-              @for (cat of categories; track cat.valeur) {
-                <li><button class="dropdown-item" type="button" (click)="categorieActive.set(cat.valeur)">{{ cat.label }}</button></li>
-              }
-            </ul>
-          </div>
-          <div class="dropdown">
-            <button class="btn btn-light border dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
-              <i class="bi bi-box-seam"></i>{{ statutActif() === 'TOUS' ? 'Statut du stock' : (statutActif() === 'DISPONIBLE' ? 'Disponible' : 'Rupture') }}
-            </button>
-            <ul class="dropdown-menu">
-              <li><button class="dropdown-item" type="button" (click)="statutActif.set('TOUS')">Tous</button></li>
-              <li><button class="dropdown-item" type="button" (click)="statutActif.set('DISPONIBLE')">Disponible</button></li>
-              <li><button class="dropdown-item" type="button" (click)="statutActif.set('RUPTURE')">Rupture</button></li>
-            </ul>
-          </div>
-        </div>
+    } @else if (error()) {
+      <div class="alert alert-danger" role="alert">
+        {{ error() }}
+        <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">Réessayer</button>
       </div>
-    </div>
-
-    <div class="row d-none d-md-flex px-3 py-2 mb-2 rounded bg-light text-secondary small fw-semibold g-2">
-      <div class="col-md-1">Photo</div>
-      <div class="col-md-3">Produit</div>
-      <div class="col-md-2">Catégorie</div>
-      <div class="col-md-2 text-center">Prix</div>
-      <div class="col-md-2 text-center">Consigne</div>
-      <div class="col-md-1 text-center">Statut</div>
-      <div class="col-md-1 text-end">Actions</div>
-    </div>
-
-    <div class="d-flex flex-column gap-3">
-      @for (produit of produitsFiltres(); track produit.id) {
-        <div class="card shadow-sm" [class.opacity-75]="!produit.disponible">
-          <div class="card-body  d-flex flex-column flex-md-row align-items-md-center gap-3">
-            <div class="row g-3 align-items-center">
-              <div class="d-flex align-items-center gap-3 flex-md-row">
-                <div class= "d-flex flex-column d-md-none">
-                  <img [src]="produit.imageUrl || imageParDefaut" [alt]="produit.nom" class="rounded border flex-shrink-0" style="width:48px;height:48px;object-fit:cover;">
-                  <div class="d-md-none"><div class="fw-semibold">{{ produit.nom }}</div><div class="small text-secondary">{{ produit.marque }} · {{ produit.format }}</div></div>
-                </div>
-              </div>
-              <div class="col-md-3 d-none d-md-block">
-                <div class="fw-semibold">{{ produit.nom }}</div>
-                <div class="small text-secondary">{{ produit.marque }} · {{ produit.format }}</div>
-              </div>
-              <div class="col-6 col-md-2">
-                <span class="small text-secondary d-md-none d-block mb-1">Catégorie</span>
-                <span class="badge rounded-pill text-bg-light border">{{ labelCategorie(produit.categorie) }}</span>
-              </div>
-              <div class="col-6 col-md-2">
-                <span class="small text-secondary d-md-none d-block mb-1">Prix</span>
-                <div class="input-group input-group-sm">
-                  <input type="number" class="form-control" min="0" [(ngModel)]="produit.prix">
-                  <span class="input-group-text">FCFA</span>
-                </div>
-              </div>
-              <div class="col-6 col-md-2">
-                <span class="small text-secondary d-md-none d-block mb-1">Consigne</span>
-                @if (produit.consignable) {
-                  <div class="input-group input-group-sm">
-                    <input type="number" class="form-control" min="0" [(ngModel)]="produit.consignePrix">
-                    <span class="input-group-text">FCFA</span>
-                  </div>
-                } @else {
-                  <span class="text-secondary">— Non consignable</span>
+    } @else {
+      <div class="card shadow-sm mb-3">
+        <div class="card-body d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+          <div class="input-group" style="max-width:340px;">
+            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control" placeholder="Rechercher un produit ou une marque..." [ngModel]="recherche()" (ngModelChange)="recherche.set($event)">
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <div class="dropdown">
+              <button class="btn btn-light border dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-funnel"></i>{{ categorieActive() === 'TOUTES' ? 'Catégorie' : labelCategorie(categorieActive()) }}
+              </button>
+              <ul class="dropdown-menu">
+                @for (cat of categories; track cat.valeur) {
+                  <li><button class="dropdown-item" type="button" (click)="categorieActive.set(cat.valeur)">{{ cat.label }}</button></li>
                 }
-              </div>
-              <div class="col-6 col-md-1">
-                <span class="small text-secondary d-md-none d-block mb-1">Statut</span>
-                <div class="form-check form-switch mb-0">
-                  <input class="form-check-input" type="checkbox" role="switch" [checked]="produit.disponible" (change)="toggleDisponibilite(produit.id)">
-                  <label class="form-check-label small" [class.text-success]="produit.disponible" [class.text-danger]="!produit.disponible">
-                    {{ produit.disponible ? 'Disponible' : 'Rupture' }}
-                  </label>
-                </div>
-              </div>
-              <div class="d-flex justify-content-end gap-2 border-top border-md-0 pt-3 pt-md-0 mt-3 mt-md-0">
-                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="ouvrirModification(produit.id)"><i class="bi bi-pencil"></i></button>
-                <button  type="button" class="btn btn-sm btn-outline-danger" (click)="supprimerProduit(produit.id)"><i class="bi bi-trash"></i></button>
-              </div>
+              </ul>
+            </div>
+            <div class="dropdown">
+              <button class="btn btn-light border dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-box-seam"></i>{{ statutActif() === 'TOUS' ? 'Statut du stock' : (statutActif() === 'DISPONIBLE' ? 'Disponible' : 'Rupture') }}
+              </button>
+              <ul class="dropdown-menu">
+                <li><button class="dropdown-item" type="button" (click)="statutActif.set('TOUS')">Tous</button></li>
+                <li><button class="dropdown-item" type="button" (click)="statutActif.set('DISPONIBLE')">Disponible</button></li>
+                <li><button class="dropdown-item" type="button" (click)="statutActif.set('RUPTURE')">Rupture</button></li>
+              </ul>
             </div>
           </div>
         </div>
-      } @empty {
-        <div class="text-center py-5 text-secondary"><i class="bi bi-inboxes fs-1 d-block mb-2"></i>Aucun produit ne correspond à votre recherche.</div>
-      }
-    </div>
+      </div>
+
+      <div class="row d-none d-md-flex px-3 py-2 mb-2 rounded bg-light text-secondary small fw-semibold g-2">
+        <div class="col-md-1">Photo</div>
+        <div class="col-md-3">Produit</div>
+        <div class="col-md-2">Catégorie</div>
+        <div class="col-md-2 text-center">Prix</div>
+        <div class="col-md-2 text-center">Consigne</div>
+        <div class="col-md-1 text-center">Statut</div>
+        <div class="col-md-1 text-end">Actions</div>
+      </div>
+
+      <div class="d-flex flex-column gap-3">
+        @for (pd of produitsFiltres(); track pd.id) {
+          <div class="card shadow-sm" [class.opacity-75]="!pd.disponible">
+            <div class="card-body d-flex flex-column flex-md-row align-items-md-center gap-3">
+              <div class="row g-3 align-items-center flex-grow-1">
+                <div class="col-md-1">
+                  <img [src]="pd.produit.visuelUrl || 'https://placehold.co/64x64/EA580C/FFFFFF?text=%20'" [alt]="pd.produit.nom" class="rounded border" style="width:48px;height:48px;object-fit:cover;">
+                </div>
+                <div class="col-md-3">
+                  <div class="fw-semibold">{{ pd.produit.nom }}</div>
+                  <div class="small text-secondary">{{ pd.produit.marque }} · {{ pd.produit.contenance }}</div>
+                </div>
+                <div class="col-6 col-md-2">
+                  <span class="small text-secondary d-md-none d-block mb-1">Catégorie</span>
+                  <span class="badge rounded-pill text-bg-light border">{{ labelCategorie(pd.produit.categorie) }}</span>
+                </div>
+                <div class="col-6 col-md-2">
+                  <span class="small text-secondary d-md-none d-block mb-1">Prix</span>
+                  <span class="fw-semibold">{{ pd.prix | number }} FCFA</span>
+                </div>
+                <div class="col-6 col-md-2">
+                  <span class="small text-secondary d-md-none d-block mb-1">Consigne</span>
+                  @if (pd.produit.estConsignable) {
+                    <span>{{ pd.montantConsigne | number }} FCFA</span>
+                  } @else {
+                    <span class="text-secondary">— Non consignable</span>
+                  }
+                </div>
+                <div class="col-6 col-md-1">
+                  <span class="small text-secondary d-md-none d-block mb-1">Statut</span>
+                  <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" role="switch" [checked]="pd.disponible" (change)="toggleDisponibilite(pd)">
+                    <label class="form-check-label small" [class.text-success]="pd.disponible" [class.text-danger]="!pd.disponible">
+                      {{ pd.disponible ? 'Disponible' : 'Rupture' }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex justify-content-end gap-2 border-top border-md-0 pt-3 pt-md-0 mt-3 mt-md-0">
+                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="ouvrirModification(pd)"><i class="bi bi-pencil"></i></button>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="text-center py-5 text-secondary"><i class="bi bi-inboxes fs-1 d-block mb-2"></i>Aucun produit ne correspond à votre recherche.</div>
+        }
+      </div>
+    }
 
   </div>
 </div>
@@ -144,38 +125,52 @@
           <button type="button" class="btn-close" (click)="fermerModal()"></button>
         </div>
         <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label">Lien vers la photo du produit</label>
-            <input type="url" class="form-control" [(ngModel)]="formulaire.imageUrl" placeholder="https://...">
-            @if (formulaire.imageUrl) {
-              <img [src]="formulaire.imageUrl" alt="Aperçu" class="rounded border mt-2" style="width:64px;height:64px;object-fit:cover;">
-            }
-          </div>
-          <div class="row g-3 mb-3">
-            <div class="col-12 col-sm-7"><label class="form-label">Nom du produit</label><input type="text" class="form-control" [(ngModel)]="formulaire.nom"></div>
-            <div class="col-12 col-sm-5"><label class="form-label">Marque</label><input type="text" class="form-control" [(ngModel)]="formulaire.marque"></div>
-          </div>
-          <div class="row g-3 mb-3">
-            <div class="col-12 col-sm-7"><label class="form-label">Format</label><input type="text" class="form-control" [(ngModel)]="formulaire.format" placeholder="Ex: Casier de 24"></div>
-            <div class="col-12 col-sm-5">
-              <label class="form-label">Catégorie</label>
-              <select class="form-select" [(ngModel)]="formulaire.categorie">
-                @for (cat of categories; track cat.valeur) {
-                  @if (cat.valeur !== 'TOUTES') { <option [value]="cat.valeur">{{ cat.label }}</option> }
+          @if (formError()) {
+            <div class="alert alert-danger" role="alert">{{ formError() }}</div>
+          }
+
+          @if (modeEdition()) {
+            <div class="mb-3">
+              <label class="form-label">Produit</label>
+              <input type="text" class="form-control" [value]="produitSelectionne()?.nom" disabled>
+            </div>
+          } @else {
+            <div class="mb-3">
+              <label class="form-label">Produit du catalogue central</label>
+              <select class="form-select" [(ngModel)]="formulaire.produitId">
+                <option value="" disabled>Choisir un produit...</option>
+                @for (p of produitsDisponiblesAjout(); track p.id) {
+                  <option [value]="p.id">{{ p.nom }} — {{ p.marque }} ({{ p.contenance }})</option>
                 }
               </select>
+              @if (produitsDisponiblesAjout().length === 0) {
+                <div class="form-text">Tous les produits du catalogue central sont déjà dans votre dépôt.</div>
+              }
             </div>
-          </div>
-          <div class="mb-3"><label class="form-label">Prix unitaire (FCFA)</label><input type="number" class="form-control" [(ngModel)]="formulaire.prix" min="0"></div>
-          <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" role="switch" [(ngModel)]="formulaire.consignable"><label class="form-check-label">Produit consignable</label></div>
-          @if (formulaire.consignable) {
-            <div class="mb-3"><label class="form-label">Montant de la consigne (FCFA)</label><input type="number" class="form-control" [(ngModel)]="formulaire.consignePrix" min="0"></div>
           }
+
+          <div class="mb-3">
+            <label class="form-label">Prix unitaire (FCFA)</label>
+            <input type="number" class="form-control" [(ngModel)]="formulaire.prix" min="0">
+          </div>
+
+          @if (produitSelectionne()?.estConsignable ?? modeEdition()) {
+            <div class="mb-3">
+              <label class="form-label">Montant de la consigne (FCFA)</label>
+              <input type="number" class="form-control" [(ngModel)]="formulaire.montantConsigne" min="0">
+            </div>
+          }
+
           <div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" [(ngModel)]="formulaire.disponible"><label class="form-check-label">Disponible</label></div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" (click)="fermerModal()">Annuler</button>
-          <button type="button" class="btn btn-primary" (click)="enregistrerProduit()">Enregistrer</button>
+          <button type="button" class="btn btn-outline-secondary" [disabled]="submitting()" (click)="fermerModal()">Annuler</button>
+          <button type="button" class="btn btn-primary" [disabled]="submitting()" (click)="enregistrer()">
+            @if (submitting()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            }
+            Enregistrer
+          </button>
         </div>
       </div>
     </div>

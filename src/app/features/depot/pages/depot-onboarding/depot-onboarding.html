@@ -73,11 +73,28 @@
           Indiquez la position précise de votre dépôt pour faciliter les livraisons.
         </p>
 
+        <label for="adresse" class="form-label">Adresse</label>
+        <input
+          id="adresse"
+          name="adresse"
+          type="text"
+          class="form-control rounded-pill px-3 mb-3"
+          placeholder="Ex: Boulevard de la Liberté, Akwa, Douala"
+          [(ngModel)]="modele.adresse"
+          #adresse="ngModel"
+          required
+          minlength="5"
+          [class.is-invalid]="adresse.invalid && adresse.touched"
+        />
+        @if (adresse.invalid && adresse.touched) {
+          <div class="invalid-feedback d-block mb-3">Merci d'indiquer l'adresse de votre dépôt.</div>
+        }
+
         <div class="map-placeholder rounded-3 border d-flex align-items-center justify-content-center position-relative" style="height:220px; background:#f1f5f9;">
           <i class="bi bi-geo-alt-fill fs-1" style="color:#a33900;"></i>
           <div class="position-absolute bottom-0 start-0 end-0 m-3 p-2 bg-white bg-opacity-75 rounded-3 border small text-secondary">
             <i class="bi bi-info-circle me-1"></i>
-            La sélection de position sur carte sera activée une fois l'intégration cartographique en place.
+            La sélection de position sur carte sera activée une fois l'intégration cartographique en place. Ta position actuelle sera utilisée par défaut.
           </div>
         </div>
       </div>
@@ -177,12 +194,19 @@
       </div>
     </section>
 
+    @if (erreur()) {
+      <div class="alert alert-danger" role="alert">{{ erreur() }}</div>
+    }
+
     <!-- Actions -->
     <div class="d-flex flex-column flex-sm-row justify-content-end gap-3 pt-2">
-      <button type="button" class="btn btn-outline-secondary rounded-pill px-4" (click)="enregistrerBrouillon()">
+      <button type="button" class="btn btn-outline-secondary rounded-pill px-4" [disabled]="envoiEnCours()" (click)="enregistrerBrouillon()">
         Enregistrer comme brouillon
       </button>
-      <button type="submit" class="btn rounded-pill px-4 text-white" style="background-color:#a33900;">
+      <button type="submit" class="btn rounded-pill px-4 text-white" style="background-color:#a33900;" [disabled]="envoiEnCours()">
+        @if (envoiEnCours()) {
+          <span class="spinner-border spinner-border-sm me-2"></span>
+        }
         Terminer la configuration
         <i class="bi bi-arrow-right ms-1"></i>
       </button>

@@ -1,5 +1,7 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { CommandesService } from '../../../../core/services/commandes.service';
+import { Commande } from '../../../../core/models/commande.model';
 
 interface ConsigneAffichee {
   id: string;
@@ -18,17 +20,58 @@ interface ConsigneAffichee {
   styleUrl: './depot-consignes.scss',
 })
 export class DepotConsignes {
-  consignes = signal<ConsigneAffichee[]>([
-    { id: '1', client: 'Bistrot du Coin', produit: 'Casier Castel Beer 65cl', montant: 3000, dateCommande: '15/08/2026', statut: 'BLOQUEE' },
-    { id: '2', client: 'Café de la Gare', produit: 'Bouteille Mützig 65cl', montant: 500, dateCommande: '14/08/2026', statut: 'BLOQUEE' },
-    { id: '3', client: "L'Ami Jean", produit: 'Casier 33 Export', montant: 200, dateCommande: '10/08/2026', statut: 'REMBOURSEE' },
-  ]);
+  private readonly commandesService = inject(CommandesService);
 
-  consignesBloquees = computed(() => this.consignes().filter(c => c.statut === 'BLOQUEE'));
+  loading = signal(true);
+  error = signal<string | null>(null);
+  private commandes = signal<Commande[]>([]);
+
+  private restitueesLocalement = signal<Set<string>>(new Set());
+
+  consignes = computed<ConsigneAffichee[]>(() => {
+    const restituees = this.restitueesLocalement();
+    return this.commandes()
+      .flatMap((commande) =>
+        commande.lignes
+          .filter((ligne) => ligne.consigne)
+          .map((ligne) => ({
+            id: ligne.consigne!.id,
+            client: commande.client.nom,
+            produit: ligne.produitDepot.produit.nom,
+            montant: ligne.consigne!.montant,
+            dateCommande: commande.createdAt,
+            statut: (restituees.has(ligne.consigne!.id) ? 'REMBOURSEE' : ligne.consigne!.statut) as
+              | 'BLOQUEE'
+              | 'REMBOURSEE',
+          }))
+      )
+      .sort((a, b) => new Date(b.dateCommande).getTime() - new Date(a.dateCommande).getTime());
+  });
+
+  consignesBloquees = computed(() => this.consignes().filter((c) => c.statut === 'BLOQUEE'));
   totalBloque = computed(() => this.consignesBloquees().reduce((somme, c) => somme + c.montant, 0));
 
+  constructor() {
+    this.load();
+  }
+
+  load(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.commandesService.getForMyDepot().subscribe({
+      next: (commandes) => {
+        this.commandes.set(commandes);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('Impossible de charger les consignes.');
+        this.loading.set(false);
+      },
+    });
+  }
+
   marquerRestituee(id: string) {
-    this.consignes.update(list => list.map(c => c.id === id ? { ...c, statut: 'REMBOURSEE' as const } : c));
-    // TODO: brancher sur PATCH /consignes/:id/restituer une fois l'endpoint disponible
+    // TODO: brancher sur un endpoint PATCH /consignes/:id/restituer une fois disponible côté backend.
+    this.restitueesLocalement.update((set) => new Set(set).add(id));
   }
 }

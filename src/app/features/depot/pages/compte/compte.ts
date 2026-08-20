@@ -17,7 +17,30 @@ export class Compte {
   email = signal(this.authService.currentUser()?.email ?? '');
   telephone = signal(this.authService.currentUser()?.telephone ?? '');
 
+  submitting = signal(false);
+  error = signal<string | null>(null);
+  succes = signal(false);
+
   enregistrer(): void {
-    console.log('Informations enregistrées :', { nomComplet: this.nomComplet(), email: this.email(), telephone: this.telephone() });
+    this.submitting.set(true);
+    this.error.set(null);
+    this.succes.set(false);
+
+    this.authService
+      .updateProfile({
+        nom: this.nomComplet(),
+        email: this.email(),
+        telephone: this.telephone() || undefined,
+      })
+      .subscribe({
+        next: () => {
+          this.submitting.set(false);
+          this.succes.set(true);
+        },
+        error: (err) => {
+          this.submitting.set(false);
+          this.error.set(err.error?.message ?? "Impossible d'enregistrer les modifications.");
+        },
+      });
   }
 }

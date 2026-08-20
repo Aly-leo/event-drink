@@ -1,46 +1,96 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { DecimalPipe, DatePipe } from '@angular/common';
+import { CommandesService } from '../../../../core/services/commandes.service';
+import { Commande, ModeReception, StatutCommande } from '../../../../core/models/commande.model';
 
-interface CommandeArticle { nom: string; sku: string; quantite: number; prixUnitaire: number; total: number; image?: string; icon?: string; }
-interface EtapeLivraison { nom: string; date?: string; statut: 'termine' | 'encours' | 'attente'; }
+const ETAPES: Record<ModeReception, { statut: StatutCommande; label: string }[]> = {
+  RETRAIT: [
+    { statut: StatutCommande.EN_ATTENTE, label: 'En attente' },
+    { statut: StatutCommande.CONFIRMEE, label: 'Confirmée' },
+    { statut: StatutCommande.PRETE_A_RETIRER, label: 'Prête à retirer' },
+    { statut: StatutCommande.TERMINEE, label: 'Terminée' },
+  ],
+  LIVRAISON: [
+    { statut: StatutCommande.EN_ATTENTE, label: 'En attente' },
+    { statut: StatutCommande.CONFIRMEE, label: 'Confirmée' },
+    { statut: StatutCommande.EN_PREPARATION, label: 'En préparation' },
+    { statut: StatutCommande.EN_ROUTE, label: 'En route' },
+    { statut: StatutCommande.LIVREE, label: 'Livrée' },
+  ],
+};
+
+const LABELS_STATUT: Record<StatutCommande, string> = {
+  EN_ATTENTE: 'En attente',
+  CONFIRMEE: 'Confirmée',
+  PRETE_A_RETIRER: 'Prête à retirer',
+  EN_PREPARATION: 'En préparation',
+  EN_ROUTE: 'En route',
+  TERMINEE: 'Terminée',
+  LIVREE: 'Livrée',
+};
 
 @Component({
   selector: 'app-details-commandes',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [DecimalPipe, DatePipe, RouterLink],
   templateUrl: './details-commandes.html',
   styleUrl: './details-commandes.scss',
 })
 export class DetailsCommandes {
-  private route = inject(ActivatedRoute);
-  numeroCommande = this.route.snapshot.paramMap.get('id') ?? 'FAC-2026-001';
+  private readonly route = inject(ActivatedRoute);
+  private readonly commandesService = inject(CommandesService);
 
-  etapesLivraison: EtapeLivraison[] = [
-    { nom: 'En attente', date: '12 Août, 08:30', statut: 'termine' },
-    { nom: 'Confirmée', date: '12 Août, 09:15', statut: 'termine' },
-    { nom: 'En préparation', date: 'En cours au dépôt', statut: 'encours' },
-    { nom: 'En route', statut: 'attente' },
-    { nom: 'Livrée', statut: 'attente' },
-  ];
+  readonly commande = signal<Commande | null>(null);
+  readonly loading = signal(true);
+  readonly error = signal<string | null>(null);
+  readonly maj = signal(false);
+  readonly labelsStatut = LABELS_STATUT;
 
-  articles: CommandeArticle[] = [
-    { nom: 'Fût Blonde Artisanal 30L', sku: 'BR-BL-30-ART', quantite: 4, prixUnitaire: 55000, total: 220000, icon: 'bi-cup-straw' },
-    { nom: 'Casier Eau Pétillante (24x33cl)', sku: 'WAT-SP-24-33', quantite: 10, prixUnitaire: 9500, total: 95000, icon: 'bi-cup-straw' },
-    { nom: 'Gobelets réutilisables (Lot de 100)', sku: 'ACC-CUP-ECO-100', quantite: 5, prixUnitaire: 5000, total: 25000, icon: 'bi-cup' },
-  ];
+  constructor() {
+    const id = this.route.snapshot.paramMap.get('id')!;
+    this.load(id);
+  }
 
-  sousTotal = 340000;
-  fraisLivraison = 1500;
-  totalTtc = 341500;
-  moyenPaiement = 'Mobile Money';
-  datePaiement = '12 août 2026';
+  load(id: string): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.commandesService.getOne(id).subscribe({
+      next: (commande) => {
+        this.commande.set(commande);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('Commande introuvable.');
+        this.loading.set(false);
+      },
+    });
+  }
 
-  depot = {
-    nom: 'Depot Centrale Akwa',
-    description: 'Hub principal de distribution — secteur Akwa',
-    adresse: 'Boulevard de la Liberté, Akwa, Douala',
-    telephone: '+237 600 000 002',
-    email: 'contact@depot-akwa.eventdrink.test',
-  };
+  etapes(commande: Commande) {
+    const steps = ETAPES[commande.mode];
+    const currentIndex = steps.findIndex((s) => s.statut === commande.statut);
+    return steps.map((s, i) => ({ ...s, atteinte: i <= currentIndex }));
+  }
+
+  prochaineEtape(commande: Commande) {
+    const steps = ETAPES[commande.mode];
+    const currentIndex = steps.findIndex((s) => s.statut === commande.statut);
+    return steps[currentIndex + 1] ?? null;
+  }
+
+  avancerStatut(commande: Commande): void {
+    const suivante = this.prochaineEtape(commande);
+    if (!suivante) return;
+    this.maj.set(true);
+    this.commandesService.updateStatut(commande.id, suivante.statut).subscribe({
+      next: (updated) => {
+        this.commande.set(updated);
+        this.maj.set(false);
+      },
+      error: () => {
+        this.maj.set(false);
+      },
+    });
+  }
 }
