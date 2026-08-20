@@ -93,7 +93,52 @@
     } @else if (depotsEnAttente().length === 0) {
       <div class="text-center text-secondary py-5">Aucun dépôt en attente d'approbation.</div>
     } @else {
-      <div class="table-responsive">
+      <!-- Cartes empilées : mobile -->
+      <div class="d-lg-none d-flex flex-column gap-3 p-3">
+        @for (depot of depotsEnAttente(); track depot.id) {
+          <div class="border rounded-3 p-3" style="border-color: var(--ed-border) !important;">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span
+                class="d-inline-flex align-items-center justify-content-center rounded-circle fw-bold text-white flex-shrink-0"
+                style="width: 36px; height: 36px; background: var(--ed-secondary); font-size: 0.8rem;"
+              >
+                {{ depot.nomCommerce.slice(0, 2).toUpperCase() }}
+              </span>
+              <div class="flex-grow-1" style="min-width: 0;">
+                <div class="fw-semibold text-truncate">{{ depot.nomCommerce }}</div>
+                <div class="small text-secondary">Soumis le {{ depot.createdAt | date: 'dd/MM/yyyy' }}</div>
+              </div>
+            </div>
+            <dl class="row small mb-3">
+              <dt class="col-5 text-secondary fw-normal">Adresse</dt>
+              <dd class="col-7 mb-1">{{ depot.adresse }}</dd>
+              <dt class="col-5 text-secondary fw-normal">Frais livraison</dt>
+              <dd class="col-7 mb-0">{{ depot.fraisLivraison | number }} FCFA</dd>
+            </dl>
+            <div class="d-flex gap-2">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger rounded-pill flex-fill"
+                [disabled]="actionEnCours() === depot.id"
+                (click)="rejeter(depot)"
+              >
+                Rejeter
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-success rounded-pill flex-fill"
+                [disabled]="actionEnCours() === depot.id"
+                (click)="valider(depot)"
+              >
+                Valider
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Tableau : desktop -->
+      <div class="table-responsive d-none d-lg-block">
       <table class="table table-hover mb-0 align-middle">
         <thead>
           <tr>
