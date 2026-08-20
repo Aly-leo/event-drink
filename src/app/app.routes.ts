@@ -10,8 +10,7 @@ export const routes: Routes = [
   {
     path: 'client',
     canActivate: [roleGuard(Role.CLIENT)],
-    loadComponent: () =>
-      import('./shared/components/coming-soon/coming-soon').then((m) => m.ComingSoon),
+    loadChildren: () => import('./features/client/client.routes').then((m) => m.CLIENT_ROUTES),
   },
   {
     path: 'depot',
@@ -23,8 +22,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     canActivate: [roleGuard(Role.ADMIN)],
-    loadComponent: () =>
-      import('./shared/components/coming-soon/coming-soon').then((m) => m.ComingSoon),
+    loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
   },
   { path: '', pathMatch: 'full', redirectTo: 'auth/login' },
   { path: '**', redirectTo: 'auth/login' },

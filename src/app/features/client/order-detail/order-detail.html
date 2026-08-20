@@ -1,0 +1,103 @@
+@if (loading()) {
+  <div class="text-center text-secondary py-5">
+    <span class="spinner-border spinner-border-sm me-2"></span>
+    Chargement...
+  </div>
+} @else if (error()) {
+  <div class="alert alert-danger m-3" role="alert">{{ error() }}</div>
+} @else if (commande(); as commande) {
+  <div class="container-fluid py-3" style="max-width: 640px;">
+    <div class="d-flex justify-content-between align-items-start mb-1">
+      <div>
+        <div class="small text-secondary">Référence commande</div>
+        <h1 class="h5 fw-bold mb-0">{{ commande.referenceUnique }}</h1>
+      </div>
+      <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis px-3 py-2">
+        {{ labelsStatut[commande.statut] }}
+      </span>
+    </div>
+    <p class="small text-secondary mb-4">
+      {{ commande.depot.nomCommerce }} · {{ commande.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+    </p>
+
+    <div class="ed-card p-3 mb-4">
+      <h2 class="h6 fw-bold mb-3">Suivi de commande</h2>
+      <div class="d-flex flex-column">
+        @for (etape of etapes(commande); track etape.statut; let last = $last) {
+          <div class="d-flex gap-3">
+            <div class="d-flex flex-column align-items-center">
+              <span
+                class="rounded-circle flex-shrink-0"
+                [style.background]="etape.atteinte ? 'var(--ed-primary)' : 'var(--ed-border)'"
+                style="width: 14px; height: 14px;"
+              ></span>
+              @if (!last) {
+                <span
+                  class="flex-grow-1"
+                  [style.background]="etape.atteinte ? 'var(--ed-primary)' : 'var(--ed-border)'"
+                  style="width: 2px; min-height: 28px;"
+                ></span>
+              }
+            </div>
+            <div class="pb-4">
+              <div class="fw-semibold small" [class.text-secondary]="!etape.atteinte">{{ etape.label }}</div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (commande.adresseLivraison) {
+      <div class="ed-card p-3 mb-4">
+        <div class="small text-secondary mb-1">Adresse de livraison</div>
+        <div class="small">{{ commande.adresseLivraison }}</div>
+        @if (commande.instructions) {
+          <div class="small text-secondary mt-1">{{ commande.instructions }}</div>
+        }
+      </div>
+    }
+
+    <div class="ed-card p-3 mb-4">
+      <h2 class="h6 fw-bold mb-3">Contenu de la commande</h2>
+      @for (ligne of commande.lignes; track ligne.id) {
+        <div class="d-flex justify-content-between small mb-1">
+          <span>{{ ligne.quantite }}× {{ ligne.produitDepot.produit.nom }}</span>
+          <span>{{ ligne.quantite * ligne.prixUnitaire | number }} FCFA</span>
+        </div>
+      }
+      <hr />
+      <div class="d-flex justify-content-between small mb-1">
+        <span>Consignes</span>
+        <span>{{ commande.lignes.reduce((s, l) => s + l.quantite * l.montantConsigneUnitaire, 0) | number }} FCFA</span>
+      </div>
+      <div class="d-flex justify-content-between small mb-2">
+        <span>Frais de livraison</span>
+        <span>{{ commande.fraisLivraison | number }} FCFA</span>
+      </div>
+      <div class="d-flex justify-content-between h6 fw-bold mb-0">
+        <span>Total</span>
+        <span>{{ commande.montantTotal | number }} FCFA</span>
+      </div>
+    </div>
+
+    <a [href]="'tel:' + commande.depot.telephone" class="btn btn-outline-primary w-100 mb-3">
+      Appeler le dépôt ({{ commande.depot.telephone }})
+    </a>
+
+    @if (estTerminee(commande)) {
+      @if (commande.avis; as avis) {
+        <div class="ed-card p-3">
+          <div class="small text-secondary mb-1">Ton avis</div>
+          <div class="mb-1" style="color: #f59e0b; letter-spacing: 2px;">{{ etoiles(avis.note) }}</div>
+          @if (avis.commentaire) {
+            <p class="small mb-0">{{ avis.commentaire }}</p>
+          }
+        </div>
+      } @else {
+        <a [routerLink]="['/client/commandes', commande.id, 'avis']" class="btn btn-outline-secondary w-100">
+          ★ Laisser un avis sur ce dépôt
+        </a>
+      }
+    }
+  </div>
+}

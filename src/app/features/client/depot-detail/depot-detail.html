@@ -1,0 +1,168 @@
+@if (loading()) {
+  <div class="text-center text-secondary py-5">
+    <span class="spinner-border spinner-border-sm me-2"></span>
+    Chargement du dépôt...
+  </div>
+} @else if (error()) {
+  <div class="alert alert-danger m-3" role="alert">{{ error() }}</div>
+} @else if (depot(); as depot) {
+  <div class="d-flex align-items-center justify-content-center" style="height: 200px; background: var(--ed-surface-container-low);">
+    @if (depot.visuelUrl) {
+      <img [src]="depot.visuelUrl" [alt]="depot.nomCommerce" class="w-100 h-100" style="object-fit: cover;" />
+    } @else {
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--ed-outline)" stroke-width="1.5">
+        <path d="M3 10.5 12 4l9 6.5" />
+        <path d="M5 9.5V20h14V9.5" />
+      </svg>
+    }
+  </div>
+
+  <div class="container-fluid py-3">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+          <h1 class="h4 fw-bold mb-0">{{ depot.nomCommerce }}</h1>
+          <span class="badge rounded-pill bg-success-subtle text-success-emphasis">Vérifié</span>
+          @if (depot.nombreAvis) {
+            <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis">
+              ★ {{ depot.noteMoyenne }} ({{ depot.nombreAvis }} avis)
+            </span>
+          }
+        </div>
+        <p class="text-secondary mb-3">{{ depot.adresse }}</p>
+
+        <div class="d-flex gap-2 flex-wrap mb-4">
+          @if (depot.modeLivraison) {
+            <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis px-3 py-2">
+              Livraison — {{ depot.fraisLivraison | number }} FCFA
+            </span>
+          }
+          @if (depot.modeRetrait) {
+            <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis px-3 py-2">
+              Retrait sur place
+            </span>
+          }
+        </div>
+
+        <h2 class="h5 fw-bold mb-3">Catalogue</h2>
+
+        @if (depot.produits.length === 0) {
+          <p class="text-secondary">Ce dépôt n'a pas encore de produits en ligne.</p>
+        } @else {
+          <div class="row g-3">
+            @for (pd of depot.produits; track pd.id) {
+              <div class="col-6 col-md-4">
+                <div class="ed-card p-0 h-100 d-flex flex-column" [class.opacity-50]="!pd.disponible">
+                  <div
+                    class="d-flex align-items-center justify-content-center border-bottom"
+                    style="height: 160px; background: #fff; border-color: var(--ed-border) !important;"
+                  >
+                    @if (pd.produit.visuelUrl) {
+                      <img
+                        [src]="pd.produit.visuelUrl"
+                        [alt]="pd.produit.nom"
+                        class="w-100 h-100 p-2"
+                        style="object-fit: contain;"
+                      />
+                    } @else {
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ed-outline)" stroke-width="1.5">
+                        <path d="M8 2h8l1 4v3a5 5 0 0 1-10 0V6l1-4Z" />
+                        <path d="M8 15v5a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-5" />
+                      </svg>
+                    }
+                  </div>
+                  <div class="p-2 d-flex flex-column flex-grow-1">
+                    <div class="small fw-semibold">{{ pd.produit.nom }}</div>
+                    <div class="small text-secondary mb-1">{{ pd.produit.contenance }}</div>
+                    @if (pd.montantConsigne > 0) {
+                      <span class="badge bg-warning-subtle text-warning-emphasis mb-1 align-self-start" style="font-size: 0.65rem;">
+                        Consigne {{ pd.montantConsigne | number }} FCFA
+                      </span>
+                    }
+                    <div class="mt-auto d-flex align-items-center justify-content-between pt-2">
+                      <span class="fw-bold text-primary">{{ pd.prix | number }} FCFA</span>
+
+                      @if (!pd.disponible) {
+                        <span class="small text-secondary">Indisponible</span>
+                      } @else if (quantiteDans(pd) === 0) {
+                        <button type="button" class="btn btn-sm btn-primary rounded-circle" style="width: 32px; height: 32px;" (click)="ajouter(pd)">
+                          +
+                        </button>
+                      } @else {
+                        <div class="d-flex align-items-center gap-2">
+                          <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle" style="width: 28px; height: 28px; padding: 0;" (click)="retirer(pd)">
+                            −
+                          </button>
+                          <span class="fw-semibold">{{ quantiteDans(pd) }}</span>
+                          <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle" style="width: 28px; height: 28px; padding: 0;" (click)="ajouter(pd)">
+                            +
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <h2 class="h5 fw-bold mb-3 mt-4">Avis clients</h2>
+        @if (depot.avis.length === 0) {
+          <p class="text-secondary">Aucun avis pour ce dépôt pour l'instant.</p>
+        } @else {
+          <div class="d-flex flex-column gap-2">
+            @for (avis of depot.avis; track avis.id) {
+              <div class="ed-card p-3">
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                  <span class="fw-semibold small">{{ avis.client.nom }}</span>
+                  <span style="color: #f59e0b; letter-spacing: 1px;">{{ etoiles(avis.note) }}</span>
+                </div>
+                @if (avis.commentaire) {
+                  <p class="small text-secondary mb-1">{{ avis.commentaire }}</p>
+                }
+                <div class="small text-secondary" style="font-size: 0.7rem;">
+                  {{ avis.createdAt | date: 'dd/MM/yyyy' }}
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Votre commande : sidebar desktop -->
+      <div class="col-lg-4 d-none d-lg-block">
+        <div class="ed-card p-3" style="position: sticky; top: 1rem;">
+          <h3 class="h6 fw-bold mb-3">Votre commande</h3>
+          @if (cartService.items().length === 0) {
+            <p class="small text-secondary">Ton panier est vide.</p>
+          } @else {
+            <div class="small text-secondary mb-2">{{ cartService.totalArticles() }} article(s)</div>
+            <div class="d-flex justify-content-between small mb-1">
+              <span>Sous-total</span>
+              <span>{{ cartService.sousTotal() | number }} FCFA</span>
+            </div>
+            <div class="d-flex justify-content-between small mb-3">
+              <span>Consignes</span>
+              <span>{{ cartService.totalConsignes() | number }} FCFA</span>
+            </div>
+            <button type="button" class="btn btn-primary w-100" (click)="allerAuPanier()">Voir le panier</button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Votre commande : barre sticky mobile -->
+  @if (cartService.items().length > 0) {
+    <div
+      class="d-lg-none position-fixed start-0 w-100 d-flex align-items-center justify-content-between px-3 py-2"
+      style="bottom: 64px; background: var(--ed-on-surface); z-index: 1025;"
+      role="button"
+      (click)="allerAuPanier()"
+    >
+      <span class="text-white small">{{ cartService.totalArticles() }} article(s) · {{ cartService.sousTotal() + cartService.totalConsignes() | number }} FCFA</span>
+      <span class="text-white fw-semibold small">Voir le panier →</span>
+    </div>
+  }
+}

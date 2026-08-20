@@ -1,0 +1,117 @@
+<div class="d-flex flex-column vh-100 overflow-hidden" style="background: var(--ed-surface);">
+  <!-- Barre du haut : desktop complète, mobile reduite (logo + panier) -->
+  <header
+    class="d-flex align-items-center justify-content-between px-3 px-lg-4 py-2 flex-shrink-0"
+    style="background: var(--ed-surface-container-lowest); border-bottom: 1px solid var(--ed-border); z-index: 1030;"
+  >
+    <a routerLink="explorer" class="d-flex align-items-center gap-2 text-decoration-none">
+      <span
+        class="d-inline-flex align-items-center justify-content-center rounded-3 fw-bold text-white"
+        style="width: 32px; height: 32px; background: var(--ed-primary); font-size: 0.9rem;"
+      >
+        E
+      </span>
+      <span class="h5 fw-bold text-primary mb-0">Eventdrink</span>
+    </a>
+
+    <nav class="d-none d-lg-flex align-items-center gap-4">
+      <a routerLink="explorer" routerLinkActive="text-primary fw-semibold" class="text-secondary text-decoration-none">
+        Explorer
+      </a>
+      <a routerLink="commandes" routerLinkActive="text-primary fw-semibold" class="text-secondary text-decoration-none">
+        Commandes
+      </a>
+      <a routerLink="compte" routerLinkActive="text-primary fw-semibold" class="text-secondary text-decoration-none">
+        Compte
+      </a>
+    </nav>
+
+    <div class="d-flex align-items-center gap-3">
+      <a routerLink="panier" class="position-relative text-secondary" aria-label="Panier">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="9" cy="21" r="1" />
+          <circle cx="20" cy="21" r="1" />
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+        </svg>
+        @if (totalArticles() > 0) {
+          <span
+            class="position-absolute badge rounded-pill bg-primary"
+            style="top: -6px; right: -10px; font-size: 0.65rem;"
+          >
+            {{ totalArticles() }}
+          </span>
+        }
+      </a>
+      <span
+        class="d-none d-lg-inline-flex align-items-center justify-content-center rounded-circle fw-bold text-white"
+        style="width: 32px; height: 32px; background: var(--ed-secondary); font-size: 0.8rem;"
+      >
+        {{ (currentUser()?.nom ?? '?').slice(0, 2).toUpperCase() }}
+      </span>
+    </div>
+  </header>
+
+  <main class="flex-grow-1 overflow-auto" style="padding-bottom: 72px;">
+    <router-outlet />
+  </main>
+
+  <!-- Barre d'onglets basse : mobile uniquement -->
+  <nav
+    class="d-flex d-lg-none justify-content-around align-items-center position-fixed bottom-0 start-0 w-100"
+    style="height: 64px; background: var(--ed-surface-container-lowest); border-top: 1px solid var(--ed-border); z-index: 1030;"
+  >
+    <a
+      routerLink="explorer"
+      routerLinkActive="text-primary"
+      class="d-flex flex-column align-items-center text-secondary text-decoration-none small"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.35-4.35" />
+      </svg>
+      Explorer
+    </a>
+    <a
+      routerLink="commandes"
+      routerLinkActive="text-primary"
+      class="d-flex flex-column align-items-center text-secondary text-decoration-none small"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 11V6a3 3 0 0 1 6 0v5" />
+        <path d="M5 9h14l1 11H4z" />
+      </svg>
+      Commandes
+    </a>
+    <a
+      routerLink="panier"
+      routerLinkActive="text-primary"
+      class="d-flex flex-column align-items-center text-secondary text-decoration-none small position-relative"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="9" cy="21" r="1" />
+        <circle cx="20" cy="21" r="1" />
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+      </svg>
+      Panier
+      @if (totalArticles() > 0) {
+        <span
+          class="position-absolute badge rounded-pill bg-primary"
+          style="top: -4px; right: 6px; font-size: 0.6rem;"
+        >
+          {{ totalArticles() }}
+        </span>
+      }
+    </a>
+    <a
+      routerLink="compte"
+      routerLinkActive="text-primary"
+      class="d-flex flex-column align-items-center text-secondary text-decoration-none small"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </svg>
+      Compte
+    </a>
+  </nav>
+</div>

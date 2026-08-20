@@ -1,0 +1,86 @@
+<div class="container-fluid py-3" style="max-width: 480px;">
+  <h1 class="h4 fw-bold text-primary mb-4">Mon compte</h1>
+
+  @if (currentUser(); as user) {
+    <div class="ed-card p-3 mb-4">
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <span
+          class="d-inline-flex align-items-center justify-content-center rounded-circle fw-bold text-white flex-shrink-0"
+          style="width: 56px; height: 56px; background: var(--ed-secondary); font-size: 1.2rem;"
+        >
+          {{ user.nom.slice(0, 2).toUpperCase() }}
+        </span>
+        <div class="flex-grow-1">
+          <div class="fw-bold">{{ user.nom }}</div>
+          <div class="small text-secondary">{{ user.email }}</div>
+        </div>
+        @if (!editing()) {
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="toggleEdition()">
+            Modifier
+          </button>
+        }
+      </div>
+
+      @if (!editing()) {
+        <dl class="row small mb-0">
+          <dt class="col-4 text-secondary fw-normal">Téléphone</dt>
+          <dd class="col-8 mb-2">{{ user.telephone || '—' }}</dd>
+          <dt class="col-4 text-secondary fw-normal">Adresse</dt>
+          <dd class="col-8 mb-0">{{ user.adresse || '—' }}</dd>
+        </dl>
+      } @else {
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <div class="mb-2">
+            <label for="nom" class="form-label small mb-1">Nom</label>
+            <input id="nom" type="text" class="form-control form-control-sm" formControlName="nom" />
+          </div>
+          <div class="mb-2">
+            <label for="email" class="form-label small mb-1">Email</label>
+            <input id="email" type="email" class="form-control form-control-sm" formControlName="email" />
+          </div>
+          <div class="mb-2">
+            <label for="telephone" class="form-label small mb-1">Téléphone</label>
+            <input id="telephone" type="tel" class="form-control form-control-sm" formControlName="telephone" />
+          </div>
+          <div class="mb-3">
+            <label for="adresse" class="form-label small mb-1">Adresse</label>
+            <textarea id="adresse" class="form-control form-control-sm" rows="2" formControlName="adresse"></textarea>
+          </div>
+
+          @if (error()) {
+            <div class="alert alert-danger py-2 small" role="alert">{{ error() }}</div>
+          }
+
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" (click)="toggleEdition()">
+              Annuler
+            </button>
+            <button type="submit" class="btn btn-sm btn-primary flex-fill" [disabled]="submitting()">
+              @if (submitting()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              }
+              Enregistrer
+            </button>
+          </div>
+        </form>
+      }
+    </div>
+
+    <div class="d-flex flex-column gap-2">
+      <a routerLink="/client/commandes" class="ed-card p-3 text-decoration-none text-body d-flex justify-content-between align-items-center">
+        <span>Mes commandes</span>
+        <span>→</span>
+      </a>
+      <a routerLink="/client/calculateur" class="ed-card p-3 text-decoration-none text-body d-flex justify-content-between align-items-center">
+        <span>Calculateur intelligent</span>
+        <span>→</span>
+      </a>
+      <a routerLink="/client/consignes" class="ed-card p-3 text-decoration-none text-body d-flex justify-content-between align-items-center">
+        <span>Mes consignes</span>
+        <span>→</span>
+      </a>
+    </div>
+
+    <button type="button" class="btn btn-outline-danger w-100 mt-4" (click)="logout()">Se déconnecter</button>
+  }
+</div>

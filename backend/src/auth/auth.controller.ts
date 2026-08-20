@@ -1,7 +1,8 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { Body, ConflictException, Controller, Get, HttpCode, HttpStatus, Patch, UseGuards, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { UpdateMeDto } from './dto/update-me.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { JwtPayload } from './strategies/jwt.strategy';
@@ -33,6 +34,21 @@ export class AuthController {
       return null;
     }
     const { password, ...safeUser } = user;
+    return safeUser;
+  }
+
+  @Patch('me')
+  @UseGuards(JwtAuthGuard)
+  async updateMe(@CurrentUser() currentUser: JwtPayload, @Body() dto: UpdateMeDto) {
+    if (dto.email) {
+      const existing = await this.usersService.findByEmail(dto.email);
+      if (existing && existing.id !== currentUser.sub) {
+        throw new ConflictException('Un compte existe déjà avec cet email.');
+      }
+    }
+
+    const updated = await this.usersService.update(currentUser.sub, dto);
+    const { password, ...safeUser } = updated;
     return safeUser;
   }
 }
