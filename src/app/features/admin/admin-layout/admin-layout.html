@@ -1,8 +1,8 @@
 <div class="d-flex vh-100 overflow-hidden" style="background: var(--ed-surface);">
   <!-- Barre mobile : logo + hamburger, visible uniquement < lg -->
   <div
-    class="d-flex d-lg-none align-items-center justify-content-between p-3 position-fixed top-0 start-0 w-100"
-    style="z-index: 1030; background: var(--ed-surface-container-lowest); border-bottom: 1px solid var(--ed-border);"
+    class="ed-glass d-flex d-lg-none align-items-center justify-content-between p-3 position-fixed top-0 start-0 w-100"
+    style="z-index: 1030; border-bottom: 1px solid var(--ed-border);"
   >
     <div class="d-flex align-items-center gap-2">
       <span
@@ -37,9 +37,9 @@
   }
 
   <aside
-    class="admin-sidebar d-flex flex-column p-3 position-fixed top-0 start-0 h-100"
+    class="ed-glass admin-sidebar d-flex flex-column p-3 position-fixed top-0 start-0 h-100"
     [class.admin-sidebar--open]="sidebarOpen()"
-    style="width: 260px; flex-shrink: 0; background: var(--ed-surface-container-lowest); border-right: 1px solid var(--ed-border); z-index: 1040; transition: transform 0.2s ease-in-out;"
+    style="width: 260px; flex-shrink: 0; border-right: 1px solid var(--ed-border); z-index: 1040; transition: transform 0.2s ease-in-out;"
   >
     <div class="d-flex align-items-center gap-2 mb-4 px-1">
       <span

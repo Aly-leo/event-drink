@@ -60,20 +60,61 @@ $card-border-radius: $border-radius-lg;
   --ed-border: #{$border-color};
   --ed-radius-card: #{$border-radius-lg};
   --ed-radius-pill: #{$border-radius-pill};
+
+  // Dégradés — mêmes teintes que la palette de marque, pas de nouvelles couleurs
+  --ed-gradient-primary: linear-gradient(135deg, #{$primary} 0%, #{$primary-hover} 60%, #{$tertiary} 130%);
+  --ed-gradient-app-bg:
+    radial-gradient(circle at 8% -5%, rgba(245, 158, 11, 0.12), transparent 42%),
+    radial-gradient(circle at 100% 0%, rgba(163, 57, 0, 0.09), transparent 40%),
+    radial-gradient(circle at 50% 110%, rgba(84, 95, 115, 0.08), transparent 55%);
+
+  // Verre — chrome flottant (headers, sidebars, modales)
+  --ed-glass-bg: rgba(255, 255, 255, 0.66);
+  --ed-glass-border: rgba(255, 255, 255, 0.55);
 }
 
 body {
   font-family: $font-family-sans-serif;
+  background-color: var(--ed-surface);
+  background-image: var(--ed-gradient-app-bg);
+  background-attachment: fixed;
 }
 
-// Carte produit/dépôt — élévation douce au survol (cf. design system)
+// Carte produit/dépôt — élévation douce et teinte dégradée au survol
 .ed-card {
   background: var(--ed-surface-container-lowest);
   border: 1px solid var(--ed-border);
   border-radius: var(--ed-radius-card);
-  transition: box-shadow 0.15s ease-in-out;
+  transition: box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out;
 
   &:hover {
-    box-shadow: 0 10px 15px -3px rgba(30, 41, 59, 0.1);
+    box-shadow: 0 12px 24px -8px rgba(163, 57, 0, 0.16), 0 4px 10px -4px rgba(30, 41, 59, 0.1);
+    transform: translateY(-2px);
   }
+}
+
+// Effet verre — à combiner avec .ed-card ou à poser seul sur du chrome flottant
+.ed-glass {
+  background: var(--ed-glass-bg) !important;
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border-color: var(--ed-glass-border) !important;
+}
+
+// Boutons primaires en dégradé (mêmes teintes, juste une nuance en plus)
+.btn-primary {
+  background-image: var(--ed-gradient-primary);
+
+  &:hover,
+  &:focus-visible,
+  &:active {
+    background-image: linear-gradient(135deg, #{$primary-hover} 0%, #{$primary} 75%);
+  }
+}
+
+.modal-content {
+  background: var(--ed-glass-bg);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid var(--ed-glass-border);
 }

@@ -1,8 +1,8 @@
 <div class="d-flex flex-column vh-100 overflow-hidden" style="background: var(--ed-surface);">
   <!-- Barre du haut : desktop complète, mobile reduite (logo + panier) -->
   <header
-    class="d-flex align-items-center justify-content-between px-3 px-lg-4 py-2 flex-shrink-0"
-    style="background: var(--ed-surface-container-lowest); border-bottom: 1px solid var(--ed-border); z-index: 1030;"
+    class="ed-glass d-flex align-items-center justify-content-between px-3 px-lg-4 py-2 flex-shrink-0"
+    style="border-bottom: 1px solid var(--ed-border); z-index: 1030;"
   >
     <a routerLink="explorer" class="d-flex align-items-center gap-2 text-decoration-none">
       <span
@@ -57,8 +57,8 @@
 
   <!-- Barre d'onglets basse : mobile uniquement -->
   <nav
-    class="d-flex d-lg-none justify-content-around align-items-center position-fixed bottom-0 start-0 w-100"
-    style="height: 64px; background: var(--ed-surface-container-lowest); border-top: 1px solid var(--ed-border); z-index: 1030;"
+    class="ed-glass d-flex d-lg-none justify-content-around align-items-center position-fixed bottom-0 start-0 w-100"
+    style="height: 64px; border-top: 1px solid var(--ed-border); z-index: 1030;"
   >
     <a
       routerLink="explorer"
