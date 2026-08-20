@@ -1,0 +1,56 @@
+<div class="p-3 p-md-4">
+  <div class="mx-auto" style="max-width: 900px;">
+
+    <div class="mb-4">
+      <h1 class="h4 fw-bold mb-1">Consignes</h1>
+      <p class="text-secondary mb-0">Suivez et clôturez les consignes dues par vos clients.</p>
+    </div>
+
+    @if (loading()) {
+      <div class="text-center text-secondary py-5">
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        Chargement des consignes...
+      </div>
+    } @else if (error()) {
+      <div class="alert alert-danger" role="alert">
+        {{ error() }}
+        <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">Réessayer</button>
+      </div>
+    } @else {
+      <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center rounded-circle bg-warning-subtle text-warning-emphasis flex-shrink-0" style="width:48px;height:48px;">
+            <i class="bi bi-arrow-repeat fs-5"></i>
+          </div>
+          <div>
+            <h2 class="h6 mb-1">Montant total bloqué</h2>
+            <p class="mb-0 small text-secondary">{{ consignesBloquees().length }} consigne(s) en attente</p>
+          </div>
+          <div class="ms-auto h4 fw-bold text-primary mb-0">{{ totalBloque() | number:'1.0-0' }} FCFA</div>
+        </div>
+      </div>
+
+      <div class="d-flex flex-column gap-3">
+        @for (consigne of consignes(); track consigne.id) {
+          <div class="card shadow-sm" [class.opacity-75]="consigne.statut === 'REMBOURSEE'">
+            <div class="card-body d-flex flex-column flex-md-row align-items-md-center gap-3">
+              <div class="flex-grow-1">
+                <div class="fw-semibold">{{ consigne.client }}</div>
+                <div class="small text-secondary">{{ consigne.produit }} · Commande du {{ consigne.dateCommande | date: 'dd/MM/yyyy' }}</div>
+              </div>
+              <div class="fw-bold">{{ consigne.montant | number:'1.0-0' }} FCFA</div>
+              @if (consigne.statut === 'BLOQUEE') {
+                <button type="button" class="btn btn-sm btn-outline-primary" (click)="marquerRestituee(consigne.id)">Marquer comme restituée</button>
+              } @else {
+                <span class="badge bg-success-subtle text-success">Restituée</span>
+              }
+            </div>
+          </div>
+        } @empty {
+          <div class="text-center py-5 text-secondary"><i class="bi bi-inboxes fs-1 d-block mb-2"></i>Aucune consigne enregistrée.</div>
+        }
+      </div>
+    }
+
+  </div>
+</div>

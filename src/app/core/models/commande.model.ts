@@ -30,6 +30,7 @@ export interface Commande {
   clientId: string;
   depotId: string;
   depot: { id: string; nomCommerce: string; telephone: string; adresse: string };
+  client: { id: string; nom: string; telephone: string | null };
   mode: ModeReception;
   statut: StatutCommande;
   montantTotal: number;

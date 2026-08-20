@@ -1,0 +1,115 @@
+@if (loading()) {
+  <div class="text-center text-secondary py-5">
+    <span class="spinner-border spinner-border-sm me-2"></span>
+    Chargement de la commande...
+  </div>
+} @else if (error()) {
+  <div class="alert alert-danger m-3" role="alert">{{ error() }}</div>
+} @else if (commande(); as commande) {
+<div class="p-3 p-md-4">
+  <div class="mx-auto" style="max-width: 1100px;">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+      <div>
+        <a routerLink="/depot/commandes" class="text-secondary text-decoration-none d-flex align-items-center gap-1 mb-2">
+          <i class="bi bi-arrow-left"></i><span class="small fw-semibold">Retour aux commandes</span>
+        </a>
+        <h1 class="h4 fw-bold mb-0">Détail de la commande <span class="text-primary">{{ commande.referenceUnique }}</span></h1>
+        <p class="small text-secondary mb-0">{{ commande.createdAt | date: 'dd/MM/yyyy HH:mm' }} · {{ commande.mode === 'LIVRAISON' ? 'Livraison' : 'Retrait' }}</p>
+      </div>
+    </div>
+
+    <div class="row g-4 align-items-start">
+
+      <aside class="col-12 col-md-3">
+        <div class="card shadow-sm"><div class="card-body p-4">
+          <h2 class="h6 fw-semibold border-bottom pb-3 mb-4">Suivi de la commande</h2>
+          <div class="position-relative">
+            @for (etape of etapes(commande); track etape.statut; let last = $last) {
+              <div class="d-flex align-items-start gap-3 position-relative" [class.mb-4]="!last">
+                @if (etape.atteinte) {
+                  <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width:24px;height:24px;z-index:2;border:3px solid white;"><i class="bi bi-check" style="font-size:12px;"></i></div>
+                } @else {
+                  <div class="rounded-circle bg-white border border-2 flex-shrink-0" style="width:24px;height:24px;z-index:2;"></div>
+                }
+                <div>
+                  <p class="fw-semibold mb-0" [class.text-secondary]="!etape.atteinte">{{ etape.label }}</p>
+                </div>
+              </div>
+            }
+          </div>
+
+          @if (prochaineEtape(commande); as suivante) {
+            <button type="button" class="btn btn-primary w-100 mt-2" [disabled]="maj()" (click)="avancerStatut(commande)">
+              @if (maj()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              }
+              Marquer « {{ suivante.label }} »
+            </button>
+          } @else {
+            <div class="text-center small text-success fw-semibold mt-2"><i class="bi bi-check-circle me-1"></i>Commande terminée</div>
+          }
+        </div></div>
+      </aside>
+
+      <section class="col-12 col-md-6">
+        <div class="card shadow-sm overflow-hidden">
+          <div class="card-header bg-light border-bottom p-4 d-flex justify-content-between align-items-center">
+            <h2 class="h6 fw-semibold mb-0">Articles commandés</h2>
+            <span class="badge rounded-pill text-bg-primary">{{ commande.lignes.length }} référence(s)</span>
+          </div>
+          <div class="card-body p-0">
+            @for (ligne of commande.lignes; track ligne.id) {
+              <div class="d-flex align-items-center p-3 border-bottom">
+                <div class="rounded-3 bg-light overflow-hidden flex-shrink-0 me-3 border d-flex align-items-center justify-content-center" style="width:56px;height:56px;">
+                  @if (ligne.produitDepot.produit.visuelUrl) {
+                    <img [src]="ligne.produitDepot.produit.visuelUrl" [alt]="ligne.produitDepot.produit.nom" class="w-100 h-100 object-fit-cover">
+                  } @else {
+                    <i class="bi bi-cup-straw fs-4 text-primary"></i>
+                  }
+                </div>
+                <div class="flex-grow-1">
+                  <h3 class="h6 fw-semibold mb-1">{{ ligne.produitDepot.produit.nom }}</h3>
+                  <p class="small text-secondary mb-0">{{ ligne.produitDepot.produit.marque }} · {{ ligne.produitDepot.produit.contenance }}</p>
+                </div>
+                <div class="text-end ms-3">
+                  <p class="small fw-semibold mb-1 text-nowrap">{{ ligne.quantite }} x {{ ligne.prixUnitaire | number:'1.0-0' }} FCFA</p>
+                  <p class="h6 fw-semibold text-primary mb-0 text-nowrap">{{ ligne.quantite * ligne.prixUnitaire | number:'1.0-0' }} FCFA</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <aside class="col-12 col-md-3">
+        <div class="card shadow-sm mb-4"><div class="card-body p-4">
+          <h2 class="h6 fw-semibold mb-4">Résumé financier</h2>
+          <div class="border-bottom pb-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2"><span class="text-secondary small">Consignes</span><span class="fw-semibold">{{ commande.lignes.reduce((s, l) => s + l.quantite * l.montantConsigneUnitaire, 0) | number:'1.0-0' }} FCFA</span></div>
+            <div class="d-flex justify-content-between align-items-center"><span class="text-secondary small">Frais de livraison</span><span class="fw-semibold">{{ commande.fraisLivraison | number:'1.0-0' }} FCFA</span></div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center"><span class="fw-semibold mb-0">Total</span><span class="h5 fw-bold text-primary mb-0">{{ commande.montantTotal | number:'1.0-0' }} FCFA</span></div>
+        </div></div>
+
+        <div class="card shadow-sm"><div class="card-body p-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px;height:40px;"><i class="bi bi-person"></i></div>
+            <h2 class="h6 fw-semibold mb-0">{{ commande.client.nom }}</h2>
+          </div>
+          @if (commande.mode === 'LIVRAISON' && commande.adresseLivraison) {
+            <div class="d-flex align-items-start gap-2 mb-2"><i class="bi bi-geo-alt text-secondary small mt-1"></i><span class="small">{{ commande.adresseLivraison }}</span></div>
+          }
+          @if (commande.instructions) {
+            <div class="d-flex align-items-start gap-2 mb-2"><i class="bi bi-info-circle text-secondary small mt-1"></i><span class="small">{{ commande.instructions }}</span></div>
+          }
+          @if (commande.client.telephone) {
+            <a [href]="'tel:' + commande.client.telephone" class="d-flex align-items-start gap-2 text-decoration-none"><i class="bi bi-telephone text-secondary small mt-1"></i><span class="small">{{ commande.client.telephone }}</span></a>
+          }
+        </div></div>
+      </aside>
+
+    </div>
+  </div>
+</div>
+}

@@ -4,6 +4,8 @@ import { DepotsService } from './depots.service';
 import { DepotsQueryDto } from './dto/depots-query.dto';
 import { AddProduitDepotDto } from './dto/add-produit-depot.dto';
 import { UpdateProduitDepotDto } from './dto/update-produit-depot.dto';
+import { CreateMyDepotDto } from './dto/create-my-depot.dto';
+import { UpdateMyDepotDto } from './dto/update-my-depot.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -20,6 +22,20 @@ export class DepotsController {
   @Roles(Role.DEPOT)
   getMyDepot(@CurrentUser() user: JwtPayload) {
     return this.depotsService.findMyDepot(user.sub);
+  }
+
+  @Post('me')
+  @UseGuards(RolesGuard)
+  @Roles(Role.DEPOT)
+  createMyDepot(@CurrentUser() user: JwtPayload, @Body() dto: CreateMyDepotDto) {
+    return this.depotsService.createMyDepot(user.sub, dto);
+  }
+
+  @Patch('me')
+  @UseGuards(RolesGuard)
+  @Roles(Role.DEPOT)
+  updateMyDepot(@CurrentUser() user: JwtPayload, @Body() dto: UpdateMyDepotDto) {
+    return this.depotsService.updateMyDepot(user.sub, dto);
   }
 
   @Get('me/produits')
