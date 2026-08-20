@@ -74,12 +74,14 @@ model User {
   password  String
   nom       String
   telephone String?
+  adresse   String?
   role      Role
   createdAt DateTime @default(now())
 
   depot     Depot?
   commandes Commande[]
   plaintes  Plainte[]
+  avis      Avis[]
 
   @@map("users")
 }
@@ -97,11 +99,13 @@ model Depot {
   modeRetrait     Boolean     @default(true)
   fraisLivraison  Int         @default(0)
   statut          StatutDepot @default(EN_ATTENTE)
+  visuelUrl       String?
   createdAt       DateTime    @default(now())
 
   produits  ProduitDepot[]
   commandes Commande[]
   plaintes  Plainte[]
+  avis      Avis[]
 
   @@map("depots")
 }
@@ -144,14 +148,17 @@ model Commande {
   client          User           @relation(fields: [clientId], references: [id])
   depotId         String
   depot           Depot          @relation(fields: [depotId], references: [id])
-  mode            ModeReception
-  statut          StatutCommande @default(EN_ATTENTE)
-  montantTotal    Int
-  fraisLivraison  Int            @default(0)
-  referenceUnique String         @unique
-  createdAt       DateTime       @default(now())
+  mode              ModeReception
+  statut            StatutCommande @default(EN_ATTENTE)
+  montantTotal      Int
+  fraisLivraison    Int            @default(0)
+  referenceUnique   String         @unique
+  adresseLivraison  String?
+  instructions      String?
+  createdAt         DateTime       @default(now())
 
   lignes LigneCommande[]
+  avis   Avis?
 
   @@map("commandes")
 }
@@ -197,4 +204,19 @@ model Plainte {
   createdAt         DateTime            @default(now())
 
   @@map("plaintes")
+}
+
+model Avis {
+  id          String   @id @default(cuid())
+  clientId    String
+  client      User     @relation(fields: [clientId], references: [id])
+  depotId     String
+  depot       Depot    @relation(fields: [depotId], references: [id])
+  commandeId  String   @unique
+  commande    Commande @relation(fields: [commandeId], references: [id])
+  note        Int
+  commentaire String?
+  createdAt   DateTime @default(now())
+
+  @@map("avis")
 }

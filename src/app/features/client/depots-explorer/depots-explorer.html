@@ -1,0 +1,108 @@
+<div class="d-flex flex-column h-100">
+  <div class="p-3 border-bottom" style="border-color: var(--ed-border) !important;">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+      <div>
+        <h1 class="h4 fw-bold text-primary mb-0">Dépôts à proximité</h1>
+        @if (usingFallbackPosition()) {
+          <p class="small text-secondary mb-0">
+            Position par défaut (Douala, Akwa) — active la géolocalisation pour des résultats plus précis.
+          </p>
+        }
+      </div>
+      <button type="button" class="btn btn-outline-secondary btn-sm d-lg-none" (click)="toggleMapMobile()">
+        {{ showMapMobile() ? 'Voir la liste' : 'Voir la carte' }}
+      </button>
+    </div>
+
+    <div class="d-flex flex-wrap align-items-center gap-2">
+      <select
+        class="form-select form-select-sm w-auto"
+        [value]="rayonKm()"
+        (change)="rayonKm.set(+$any($event.target).value); load()"
+      >
+        <option [value]="2">Rayon : 2 km</option>
+        <option [value]="5">Rayon : 5 km</option>
+        <option [value]="10">Rayon : 10 km</option>
+        <option [value]="20">Rayon : 20 km</option>
+      </select>
+
+      <button
+        type="button"
+        class="btn btn-sm rounded-pill"
+        [class.btn-primary]="livraisonSeulement()"
+        [class.btn-outline-secondary]="!livraisonSeulement()"
+        (click)="livraisonSeulement.set(!livraisonSeulement())"
+      >
+        Livraison disponible
+      </button>
+    </div>
+  </div>
+
+  <div class="row g-0 flex-grow-1 overflow-hidden">
+    <div class="col-lg-5 h-100 overflow-auto d-lg-block" [class.d-none]="showMapMobile()">
+      @if (loading()) {
+        <div class="text-center text-secondary py-5">
+          <span class="spinner-border spinner-border-sm me-2"></span>
+          Recherche des dépôts...
+        </div>
+      } @else if (error()) {
+        <div class="alert alert-danger m-3" role="alert">
+          {{ error() }}
+          <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">Réessayer</button>
+        </div>
+      } @else if (filtered().length === 0) {
+        <div class="text-center text-secondary py-5">Aucun dépôt trouvé dans ce rayon.</div>
+      } @else {
+        <div class="p-3 d-flex flex-column gap-3">
+          @for (depot of filtered(); track depot.id) {
+            <div class="ed-card p-0 overflow-hidden" role="button" (click)="ouvrirDepot(depot)">
+              <div
+                class="d-flex align-items-center justify-content-center"
+                style="height: 140px; background: var(--ed-surface-container-low);"
+              >
+                @if (depot.visuelUrl) {
+                  <img [src]="depot.visuelUrl" [alt]="depot.nomCommerce" class="w-100 h-100" style="object-fit: cover;" />
+                } @else {
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--ed-outline)" stroke-width="1.5">
+                    <path d="M3 10.5 12 4l9 6.5" />
+                    <path d="M5 9.5V20h14V9.5" />
+                  </svg>
+                }
+              </div>
+              <div class="p-3">
+                <div class="d-flex justify-content-between align-items-start">
+                  <h2 class="h6 fw-bold mb-1">{{ depot.nomCommerce }}</h2>
+                  @if (depot.distanceKm !== null && depot.distanceKm !== undefined) {
+                    <span class="small text-secondary flex-shrink-0 ms-2">{{ depot.distanceKm }} km</span>
+                  }
+                </div>
+                @if (depot.nombreAvis) {
+                  <div class="small mb-1" style="color: #f59e0b;">
+                    ★ {{ depot.noteMoyenne }} <span class="text-secondary">({{ depot.nombreAvis }} avis)</span>
+                  </div>
+                }
+                <p class="small text-secondary mb-2">{{ depot.adresse }}</p>
+                <div class="d-flex gap-2 flex-wrap">
+                  @if (depot.modeLivraison) {
+                    <span class="badge rounded-pill bg-success-subtle text-success-emphasis px-2 py-1">
+                      Livraison {{ depot.fraisLivraison | number }} FCFA
+                    </span>
+                  }
+                  @if (depot.modeRetrait) {
+                    <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis px-2 py-1">
+                      Retrait
+                    </span>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="col-lg-7 h-100 position-relative d-lg-block" [class.d-none]="!showMapMobile()">
+      <div #mapEl style="height: 100%; width: 100%;"></div>
+    </div>
+  </div>
+</div>

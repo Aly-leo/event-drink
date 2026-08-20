@@ -1,0 +1,184 @@
+<div class="container-sm py-4" style="max-width: 560px;">
+  <div class="mb-4">
+    <h1 class="h4 fw-bold mb-1 text-primary">Calculateur intelligent</h1>
+    <p class="text-secondary">Estime tes besoins en boissons pour ton événement, avec les vrais prix d'un dépôt.</p>
+  </div>
+
+  <!-- Etape 0 : choix du depot -->
+  <div class="ed-card p-3 mb-3">
+    <label for="depot" class="form-label fw-semibold mb-2">Dépôt</label>
+    @if (loadingDepots()) {
+      <div class="small text-secondary">Chargement des dépôts...</div>
+    } @else {
+      <select
+        id="depot"
+        class="form-select"
+        (change)="choisirDepot($any($event.target).value)"
+      >
+        <option value="">Choisir un dépôt...</option>
+        @for (depot of depots(); track depot.id) {
+          <option [value]="depot.id">{{ depot.nomCommerce }}</option>
+        }
+      </select>
+    }
+    @if (loadingCatalogue()) {
+      <div class="small text-secondary mt-2">
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        Chargement du catalogue...
+      </div>
+    }
+  </div>
+
+  @if (depotSelectionne(); as depot) {
+    <!-- Datalists pour l'auto-completion, une par categorie -->
+    @for (cat of categories; track cat.value) {
+      <datalist [id]="'liste-' + cat.value">
+        @for (pd of produitsDeCategorie(cat.value); track pd.id) {
+          <option [value]="pd.produit.nom"></option>
+        }
+      </datalist>
+    }
+
+    <!-- Type d'evenement -->
+    <div class="ed-card p-3 mb-3">
+      <label class="form-label fw-semibold mb-3">Type d'événement</label>
+      <div class="row row-cols-3 g-2">
+        @for (type of typesEvenement; track type.value) {
+          <div class="col">
+            <input type="radio" class="btn-check" name="typeEvenement" [id]="'type-' + type.value" [value]="type.value" [(ngModel)]="typeEvenement">
+            <label class="btn btn-outline-primary w-100 py-2 d-flex flex-column align-items-center" [for]="'type-' + type.value">
+              <span class="small">{{ type.label }}</span>
+            </label>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Nombre d'invites -->
+    <div class="ed-card p-3 mb-3">
+      <label for="invites" class="form-label fw-semibold">Nombre d'invités</label>
+      <input id="invites" type="number" class="form-control" [(ngModel)]="nombreInvites" min="0">
+    </div>
+
+    <!-- Marge pour imprevus -->
+    <div class="ed-card p-3 mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <label for="marge" class="form-label fw-semibold mb-0">Marge pour imprévus</label>
+        <span class="badge bg-primary-subtle text-primary-emphasis">{{ marge() }}%</span>
+      </div>
+      <input id="marge" type="range" class="form-range" min="0" max="30" [(ngModel)]="marge">
+      <p class="small text-secondary mb-0">Recommandé : +{{ inviteExtra }} invités extra</p>
+    </div>
+
+    <!-- Choix des categories -->
+    <div class="ed-card p-3 mb-3">
+      <label class="form-label fw-semibold mb-3">Catégories de boissons</label>
+      <div class="d-flex flex-wrap gap-2">
+        @for (cat of categories; track cat.value) {
+          <button
+            type="button"
+            class="btn btn-sm rounded-pill"
+            [class.btn-primary]="categoriesSelectionnees().includes(cat.value)"
+            [class.btn-outline-secondary]="!categoriesSelectionnees().includes(cat.value)"
+            (click)="toggleCategorie(cat.value)"
+          >
+            {{ cat.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Saisie libre des boissons par categorie -->
+    @for (cat of categories; track cat.value) {
+      @if (categoriesSelectionnees().includes(cat.value)) {
+        <div class="ed-card p-3 mb-3">
+          <label class="form-label fw-semibold mb-3">{{ cat.label }}</label>
+
+          @for (ligne of lignesDeCategorie(cat.value); track ligne.id) {
+            <div class="mb-2 p-2 border rounded">
+              <div class="d-flex gap-2 mb-1">
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  [attr.list]="'liste-' + cat.value"
+                  placeholder="Nom du produit..."
+                  [ngModel]="ligne.nomSaisi"
+                  (ngModelChange)="onNomChange(ligne.id, $event)"
+                >
+                <button type="button" class="btn btn-sm btn-outline-danger" (click)="supprimerLigne(ligne.id)">✕</button>
+              </div>
+
+              @if (produitReconnu(ligne.nomSaisi, cat.value); as produit) {
+                <div class="d-flex align-items-center flex-wrap gap-2 small">
+                  <input
+                    type="number"
+                    class="form-control form-control-sm"
+                    style="width: 80px;"
+                    [ngModel]="ligne.quantite"
+                    (ngModelChange)="onQuantiteChange(ligne.id, $event)"
+                    min="0"
+                  >
+                  <span class="text-secondary">{{ produit.produit.contenance }}</span>
+                  <span class="text-secondary">— {{ produit.prix | number:'1.0-0' }} FCFA</span>
+                  @if (produit.montantConsigne > 0) {
+                    <span class="badge bg-light text-dark border">+{{ produit.montantConsigne | number:'1.0-0' }} FCFA consigne</span>
+                  }
+                  <span class="fw-semibold ms-auto">{{ (ligne.quantite * produit.prix) | number:'1.0-0' }} FCFA</span>
+                </div>
+              } @else if (ligne.nomSaisi.trim().length > 0) {
+                <p class="small text-danger mb-0">Produit non reconnu dans le catalogue de ce dépôt.</p>
+              }
+            </div>
+          }
+
+          <button type="button" class="btn btn-sm btn-outline-primary mt-1" (click)="ajouterLigne(cat.value)">
+            + Ajouter une boisson
+          </button>
+        </div>
+      }
+    }
+
+    <!-- Recapitulatif -->
+    @if (lignesReconnues().length > 0) {
+      <div class="ed-card text-white mb-3" style="background-color: var(--ed-primary);">
+        <div class="p-3">
+          <h2 class="h6 mb-3">Récapitulatif</h2>
+
+          @for (item of lignesReconnues(); track item.ligne.id) {
+            <div class="d-flex justify-content-between small mb-1">
+              <span>{{ item.produit!.produit.nom }} × {{ item.ligne.quantite }}</span>
+              <span>{{ (item.ligne.quantite * item.produit!.prix) | number:'1.0-0' }} FCFA</span>
+            </div>
+          }
+
+          <div class="d-flex justify-content-between small border-top border-white border-opacity-25 pt-2 mt-2">
+            <span>Sous-total boissons</span>
+            <span>{{ prixBoissons() | number:'1.0-0' }} FCFA</span>
+          </div>
+
+          @if (montantConsignes() > 0) {
+            <div class="d-flex justify-content-between small">
+              <span>Consignes (casiers/bouteilles verre)</span>
+              <span>{{ montantConsignes() | number:'1.0-0' }} FCFA</span>
+            </div>
+          }
+
+          <div class="d-flex justify-content-between fw-bold border-top border-white border-opacity-25 pt-2 mt-2">
+            <span>Total estimé</span>
+            <span>{{ prixTotal() | number:'1.0-0' }} FCFA</span>
+          </div>
+
+          @if (montantConsignes() > 0) {
+            <p class="small text-white-50 mb-0 mt-2">
+              La consigne est remboursée au retour des casiers/bouteilles vides au dépôt.
+            </p>
+          }
+        </div>
+      </div>
+    }
+
+    <button type="button" class="btn btn-primary w-100 py-2 mb-4" [disabled]="lignesReconnues().length === 0" (click)="appliquerAuPanier()">
+      Appliquer au panier
+    </button>
+  }
+</div>

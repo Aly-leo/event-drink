@@ -24,8 +24,11 @@ export class DepotsService {
       where: { statut: StatutDepot.VALIDE },
     });
 
+    const avisParDepot = await this.avisAgregesParDepot(depots.map((d) => d.id));
+
     const withDistance = depots.map((depot) => ({
       ...depot,
+      ...avisParDepot(depot.id),
       distanceKm:
         query.lat !== undefined && query.lng !== undefined
           ? Math.round(distanceKm(query.lat, query.lng, depot.latitude, depot.longitude) * 10) / 10
@@ -52,7 +55,37 @@ export class DepotsService {
     if (!depot) {
       throw new NotFoundException('Dépôt introuvable.');
     }
-    return depot;
+
+    const [avis, avisParDepot] = await Promise.all([
+      this.prisma.avis.findMany({
+        where: { depotId: id },
+        include: { client: { select: { nom: true } } },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.avisAgregesParDepot([id]),
+    ]);
+
+    return { ...depot, ...avisParDepot(id), avis };
+  }
+
+  /** Renvoie une fonction (depotId) -> { noteMoyenne, nombreAvis }, une seule requete groupee (pas de N+1). */
+  private async avisAgregesParDepot(depotIds: string[]) {
+    if (depotIds.length === 0) {
+      return () => ({ noteMoyenne: null, nombreAvis: 0 });
+    }
+    const groupes = await this.prisma.avis.groupBy({
+      by: ['depotId'],
+      where: { depotId: { in: depotIds } },
+      _avg: { note: true },
+      _count: { note: true },
+    });
+    const parId = new Map(
+      groupes.map((g) => [
+        g.depotId,
+        { noteMoyenne: Math.round((g._avg.note ?? 0) * 10) / 10, nombreAvis: g._count.note },
+      ])
+    );
+    return (depotId: string) => parId.get(depotId) ?? { noteMoyenne: null, nombreAvis: 0 };
   }
 
   findMyDepot(ownerId: string) {

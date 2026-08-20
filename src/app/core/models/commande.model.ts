@@ -1,3 +1,5 @@
+import { ProduitDepot } from './produit.model';
+
 export enum ModeReception {
   RETRAIT = 'RETRAIT',
   LIVRAISON = 'LIVRAISON',
@@ -16,20 +18,26 @@ export enum StatutCommande {
 export interface LigneCommande {
   id: string;
   produitDepotId: string;
+  produitDepot: ProduitDepot;
   quantite: number;
   prixUnitaire: number;
   montantConsigneUnitaire: number;
+  consigne: { id: string; montant: number; statut: 'BLOQUEE' | 'REMBOURSEE' } | null;
 }
 
 export interface Commande {
   id: string;
   clientId: string;
   depotId: string;
+  depot: { id: string; nomCommerce: string; telephone: string; adresse: string };
   mode: ModeReception;
   statut: StatutCommande;
   montantTotal: number;
   fraisLivraison: number;
   referenceUnique: string;
+  adresseLivraison: string | null;
+  instructions: string | null;
   lignes: LigneCommande[];
+  avis: { id: string; note: number; commentaire: string | null } | null;
   createdAt: string;
 }

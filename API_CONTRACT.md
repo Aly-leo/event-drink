@@ -115,20 +115,25 @@ Liste des dépôts `statut: VALIDE` uniquement. `lat`/`lng`/`rayonKm` optionnels
     "modeRetrait": true,
     "fraisLivraison": 500,
     "statut": "VALIDE",
+    "visuelUrl": null,
     "createdAt": "2026-08-14T14:01:49.741Z",
-    "distanceKm": 1.2
+    "distanceKm": 1.2,
+    "noteMoyenne": 4.5,
+    "nombreAvis": 2
   }
 ]
 ```
-`distanceKm` vaut `null` si `lat`/`lng` non fournis.
+`distanceKm` vaut `null` si `lat`/`lng` non fournis. `noteMoyenne`/`nombreAvis` agrégés depuis `Avis` (`noteMoyenne: null` si `nombreAvis: 0`).
 
 ### `GET /depots/:id`
-Détail d'un dépôt (n'importe quel statut) + son catalogue. 404 si introuvable.
+Détail d'un dépôt (n'importe quel statut) + son catalogue + ses avis. 404 si introuvable.
 ```json
 {
   "id": "clx...",
   "nomCommerce": "Depot Centrale Akwa",
   "...": "...",
+  "noteMoyenne": 4.5,
+  "nombreAvis": 2,
   "produits": [
     {
       "id": "clx...",
@@ -138,6 +143,15 @@ Détail d'un dépôt (n'importe quel statut) + son catalogue. 404 si introuvable
       "montantConsigne": 150,
       "disponible": true,
       "produit": { "id": "clx...", "nom": "Castel Beer", "...": "..." }
+    }
+  ],
+  "avis": [
+    {
+      "id": "clx...",
+      "note": 5,
+      "commentaire": "Très bon service, livraison rapide.",
+      "createdAt": "2026-08-19T16:42:18.460Z",
+      "client": { "nom": "Client Démo" }
     }
   ]
 }
@@ -268,31 +282,107 @@ Statut → `RESOLUE`.
 
 ---
 
-## Squelette des routes à venir (Jour 3-4)
+## Commandes — implémenté
 
-> Non implémentées — formes indicatives pour que Carmen/Nadia puissent mocker dès maintenant. Ce fichier sera mis à jour à chaque implémentation réelle.
-
-### Commandes (Jour 3-4)
-
-`POST /commandes` (CLIENT) :
+### `POST /commandes` — rôle `CLIENT`
 ```json
 {
   "depotId": "clx...",
   "mode": "LIVRAISON",
+  "adresseLivraison": "15 Rue de la Paix, Akwa, Douala",
+  "instructions": "Code digicode 1234",
   "lignes": [
     { "produitDepotId": "clx...", "quantite": 2 }
   ]
 }
 ```
-Réponse : `Commande` avec `montantTotal` calculé côté serveur (prix + consignes + frais livraison), `referenceUnique` générée (`FAC-2026-xxxx`).
+`adresseLivraison` obligatoire si `mode: "LIVRAISON"` (400 sinon), `instructions` toujours optionnel. `mode` doit être supporté par le dépôt (`modeLivraison`/`modeRetrait`), sinon 400. Chaque `produitDepotId` doit appartenir à `depotId` et être `disponible` (sinon 400 — jamais confiance dans un prix envoyé par le client, toujours recalculé depuis le `ProduitDepot`).
 
-`GET /commandes/mine` (CLIENT) — historique du client courant.
-`GET /commandes?depotId=...` (DEPOT, propriétaire) — commandes reçues par le dépôt.
-`PATCH /commandes/:id/statut` (DEPOT) :
+Réponse `201` — `Commande` complète :
+```json
+{
+  "id": "clx...",
+  "clientId": "clx...",
+  "depotId": "clx...",
+  "depot": { "id": "clx...", "nomCommerce": "...", "telephone": "...", "adresse": "..." },
+  "mode": "LIVRAISON",
+  "statut": "EN_ATTENTE",
+  "montantTotal": 9277,
+  "fraisLivraison": 500,
+  "referenceUnique": "FAC-2026-8942",
+  "adresseLivraison": "15 Rue de la Paix, Akwa, Douala",
+  "instructions": "Code digicode 1234",
+  "createdAt": "2026-08-19T14:29:00.000Z",
+  "lignes": [
+    {
+      "id": "clx...",
+      "produitDepotId": "clx...",
+      "produitDepot": { "id": "clx...", "prix": 2782, "montantConsigne": 150, "produit": { "nom": "Castel Beer", "...": "..." } },
+      "quantite": 2,
+      "prixUnitaire": 2782,
+      "montantConsigneUnitaire": 150,
+      "consigne": { "id": "clx...", "montant": 300, "statut": "BLOQUEE" }
+    }
+  ],
+  "avis": null
+}
+```
+`avis` est `null` tant qu'aucun avis n'a été laissé pour cette commande, sinon `{ id, note, commentaire }` (voir section Avis).
+`montantTotal` = Σ(prix×qté) + Σ(consigne×qté) + frais de livraison (si mode LIVRAISON). Une `Consigne` (`BLOQUEE`) est créée pour chaque ligne dont `montantConsigneUnitaire > 0`. `referenceUnique` au format `FAC-{année}-{4 chiffres}`, garanti unique (retry automatique sur collision).
+
+### `GET /commandes/mine` — rôle `CLIENT`
+Historique du client connecté (`Commande[]`, même forme que ci-dessus), tri `createdAt desc`.
+
+### `GET /commandes/:id`
+Tout rôle authentifié. Le service vérifie l'appartenance (`CLIENT` → doit être le sien, `DEPOT` → doit posséder le dépôt lié, `ADMIN` → toujours autorisé). **404** (jamais 403) si non autorisé.
+
+### `GET /commandes/depot/mine` — rôle `DEPOT`
+Commandes reçues par le dépôt du compte connecté (résolu via `ownerId`, jamais un `depotId` arbitraire).
+
+### `PATCH /commandes/:id/statut` — rôle `DEPOT`
 ```json
 { "statut": "CONFIRMEE" }
 ```
-Valeurs `statut` selon le mode (`RETRAIT` : `EN_ATTENTE → CONFIRMEE → PRETE_A_RETIRER → TERMINEE` ; `LIVRAISON` : `EN_ATTENTE → CONFIRMEE → EN_PREPARATION → EN_ROUTE → LIVREE`).
+Vérifie la propriété du dépôt et que la transition respecte la séquence du `mode` (`RETRAIT` : `EN_ATTENTE → CONFIRMEE → PRETE_A_RETIRER → TERMINEE` ; `LIVRAISON` : `EN_ATTENTE → CONFIRMEE → EN_PREPARATION → EN_ROUTE → LIVREE`). 400 si la transition saute une étape.
+
+---
+
+## Avis — implémenté [bonus]
+
+Un avis note un dépôt à l'issue d'une commande terminée (`TERMINEE` ou `LIVREE`). Un seul avis par commande (`commandeId` unique).
+
+### `POST /avis` — rôle `CLIENT`
+```json
+{
+  "commandeId": "clx...",
+  "note": 5,
+  "commentaire": "Très bon service, livraison rapide."
+}
+```
+`note` entier entre 1 et 5, `commentaire` optionnel. Le `depotId` est résolu depuis la commande, jamais depuis le body. Réponse `201` :
+```json
+{
+  "id": "clx...",
+  "clientId": "clx...",
+  "depotId": "clx...",
+  "commandeId": "clx...",
+  "note": 5,
+  "commentaire": "Très bon service, livraison rapide.",
+  "createdAt": "2026-08-19T16:42:18.460Z"
+}
+```
+Erreurs :
+- `404` — commande introuvable ou n'appartenant pas au client connecté (jamais 403, pour ne pas confirmer l'existence de la commande à autrui).
+- `400` — la commande n'est pas encore terminée (`statut` autre que `TERMINEE`/`LIVREE`).
+- `409` — un avis existe déjà pour cette commande.
+
+Les avis d'un dépôt sont consultables via `GET /depots/:id` (champ `avis[]`), et les agrégats `noteMoyenne`/`nombreAvis` apparaissent sur `GET /depots` et `GET /depots/:id` (voir section Dépôts).
+
+---
+
+## Squelette des routes à venir (Jour 4)
+
+> Non implémentées — formes indicatives. Ce fichier sera mis à jour à chaque implémentation réelle.
 
 ### Consigne (Jour 4, version light)
 

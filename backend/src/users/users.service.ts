@@ -25,4 +25,8 @@ export class UsersService {
   create(data: CreateUserInput) {
     return this.prisma.user.create({ data });
   }
+
+  update(id: string, data: Partial<Pick<CreateUserInput, 'nom' | 'telephone' | 'email'>> & { adresse?: string }) {
+    return this.prisma.user.update({ where: { id }, data });
+  }
 }
