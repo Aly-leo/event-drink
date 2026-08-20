@@ -11,6 +11,7 @@ const INCLUDE_FULL = {
       consigne: true,
     },
   },
+  avis: true,
 };
 
 const TRANSITIONS: Record<ModeReception, StatutCommande[]> = {
