@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { CommandesService } from '../../../core/services/commandes.service';
 import { Commande, ModeReception, StatutCommande } from '../../../core/models/commande.model';
@@ -30,10 +30,12 @@ const LABELS_STATUT: Record<StatutCommande, string> = {
   LIVREE: 'Livrée',
 };
 
+const STATUTS_TERMINES: StatutCommande[] = [StatutCommande.TERMINEE, StatutCommande.LIVREE];
+
 @Component({
   selector: 'app-order-detail',
   standalone: true,
-  imports: [DecimalPipe, DatePipe],
+  imports: [DecimalPipe, DatePipe, RouterLink],
   templateUrl: './order-detail.html',
 })
 export class OrderDetail {
@@ -69,5 +71,13 @@ export class OrderDetail {
     const steps = ETAPES[commande.mode];
     const currentIndex = steps.findIndex((s) => s.statut === commande.statut);
     return steps.map((s, i) => ({ ...s, atteinte: i <= currentIndex }));
+  }
+
+  estTerminee(commande: Commande): boolean {
+    return STATUTS_TERMINES.includes(commande.statut);
+  }
+
+  etoiles(note: number): string {
+    return '★'.repeat(note) + '☆'.repeat(5 - note);
   }
 }

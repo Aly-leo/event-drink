@@ -80,8 +80,24 @@
       </div>
     </div>
 
-    <a [href]="'tel:' + commande.depot.telephone" class="btn btn-outline-primary w-100">
+    <a [href]="'tel:' + commande.depot.telephone" class="btn btn-outline-primary w-100 mb-3">
       Appeler le dépôt ({{ commande.depot.telephone }})
     </a>
+
+    @if (estTerminee(commande)) {
+      @if (commande.avis; as avis) {
+        <div class="ed-card p-3">
+          <div class="small text-secondary mb-1">Ton avis</div>
+          <div class="mb-1" style="color: #f59e0b; letter-spacing: 2px;">{{ etoiles(avis.note) }}</div>
+          @if (avis.commentaire) {
+            <p class="small mb-0">{{ avis.commentaire }}</p>
+          }
+        </div>
+      } @else {
+        <a [routerLink]="['/client/commandes', commande.id, 'avis']" class="btn btn-outline-secondary w-100">
+          ★ Laisser un avis sur ce dépôt
+        </a>
+      }
+    }
   </div>
 }

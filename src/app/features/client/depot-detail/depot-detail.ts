@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, DatePipe } from '@angular/common';
 import { DepotsService } from '../../../core/services/depots.service';
 import { CartService } from '../../../core/services/cart.service';
 import { DepotDetail as DepotDetailModel } from '../../../core/models/depot.model';
@@ -9,7 +9,7 @@ import { ProduitDepot } from '../../../core/models/produit.model';
 @Component({
   selector: 'app-depot-detail',
   standalone: true,
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, DatePipe],
   templateUrl: './depot-detail.html',
 })
 export class DepotDetail {
@@ -89,5 +89,9 @@ export class DepotDetail {
 
   allerAuPanier(): void {
     this.router.navigateByUrl('/client/panier');
+  }
+
+  etoiles(note: number): string {
+    return '★'.repeat(note) + '☆'.repeat(5 - note);
   }
 }

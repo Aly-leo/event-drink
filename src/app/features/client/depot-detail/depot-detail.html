@@ -20,9 +20,14 @@
   <div class="container-fluid py-3">
     <div class="row g-4">
       <div class="col-lg-8">
-        <div class="d-flex align-items-center gap-2 mb-1">
+        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
           <h1 class="h4 fw-bold mb-0">{{ depot.nomCommerce }}</h1>
           <span class="badge rounded-pill bg-success-subtle text-success-emphasis">Vérifié</span>
+          @if (depot.nombreAvis) {
+            <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis">
+              ★ {{ depot.noteMoyenne }} ({{ depot.nombreAvis }} avis)
+            </span>
+          }
         </div>
         <p class="text-secondary mb-3">{{ depot.adresse }}</p>
 
@@ -96,6 +101,28 @@
                       }
                     </div>
                   </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <h2 class="h5 fw-bold mb-3 mt-4">Avis clients</h2>
+        @if (depot.avis.length === 0) {
+          <p class="text-secondary">Aucun avis pour ce dépôt pour l'instant.</p>
+        } @else {
+          <div class="d-flex flex-column gap-2">
+            @for (avis of depot.avis; track avis.id) {
+              <div class="ed-card p-3">
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                  <span class="fw-semibold small">{{ avis.client.nom }}</span>
+                  <span style="color: #f59e0b; letter-spacing: 1px;">{{ etoiles(avis.note) }}</span>
+                </div>
+                @if (avis.commentaire) {
+                  <p class="small text-secondary mb-1">{{ avis.commentaire }}</p>
+                }
+                <div class="small text-secondary" style="font-size: 0.7rem;">
+                  {{ avis.createdAt | date: 'dd/MM/yyyy' }}
                 </div>
               </div>
             }

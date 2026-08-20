@@ -19,8 +19,11 @@ export interface Depot {
   visuelUrl?: string | null;
   createdAt: string;
   distanceKm?: number | null;
+  noteMoyenne?: number | null;
+  nombreAvis?: number;
 }
 
 export interface DepotDetail extends Depot {
   produits: import('./produit.model').ProduitDepot[];
+  avis: import('./avis.model').Avis[];
 }

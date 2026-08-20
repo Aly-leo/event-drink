@@ -1,0 +1,43 @@
+<div class="container-fluid py-4" style="max-width: 480px;">
+  <h1 class="h4 fw-bold text-primary mb-1">Laisser un avis</h1>
+  <p class="text-secondary mb-4">Comment s'est passée ta commande ?</p>
+
+  <div class="ed-card p-4 text-center mb-3">
+    <div class="d-flex justify-content-center gap-2 mb-3">
+      @for (etoile of etoiles; track etoile) {
+        <button
+          type="button"
+          class="btn p-0 border-0 bg-transparent"
+          style="font-size: 2rem; line-height: 1; color: var(--ed-border);"
+          [style.color]="etoile <= note() ? '#f59e0b' : 'var(--ed-border)'"
+          (click)="choisirNote(etoile)"
+          [attr.aria-label]="etoile + ' étoile(s)'"
+        >
+          ★
+        </button>
+      }
+    </div>
+
+    <textarea
+      class="form-control"
+      rows="4"
+      placeholder="Ton commentaire (optionnel)..."
+      [ngModel]="commentaire()"
+      (ngModelChange)="commentaire.set($event)"
+    ></textarea>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger py-2" role="alert">{{ error() }}</div>
+  }
+
+  <div class="d-flex gap-2">
+    <a [routerLink]="['/client/commandes', commandeId]" class="btn btn-outline-secondary flex-fill">Annuler</a>
+    <button type="button" class="btn btn-primary flex-fill" [disabled]="submitting()" (click)="submit()">
+      @if (submitting()) {
+        <span class="spinner-border spinner-border-sm me-2"></span>
+      }
+      Envoyer
+    </button>
+  </div>
+</div>

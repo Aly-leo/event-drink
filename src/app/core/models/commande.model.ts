@@ -38,5 +38,6 @@ export interface Commande {
   adresseLivraison: string | null;
   instructions: string | null;
   lignes: LigneCommande[];
+  avis: { id: string; note: number; commentaire: string | null } | null;
   createdAt: string;
 }

@@ -1,0 +1,72 @@
+<div class="container-fluid py-3" style="max-width: 640px;">
+  <h1 class="h4 fw-bold text-primary mb-1">Mes consignes</h1>
+  <p class="text-secondary mb-4">Casiers et bouteilles à récupérer auprès des dépôts.</p>
+
+  @if (loading()) {
+    <div class="text-center text-secondary py-5">
+      <span class="spinner-border spinner-border-sm me-2"></span>
+      Chargement...
+    </div>
+  } @else if (error()) {
+    <div class="alert alert-danger" role="alert">
+      {{ error() }}
+      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">Réessayer</button>
+    </div>
+  } @else if (groupes().length === 0) {
+    <div class="text-center text-secondary py-5">Aucune consigne active pour l'instant.</div>
+  } @else {
+    <div class="row g-3 mb-4">
+      <div class="col-6">
+        <div class="ed-card p-3">
+          <div class="small text-secondary">Casiers consignés actifs</div>
+          <div class="h3 fw-bold mb-0">{{ totalCasiers() }}</div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="ed-card p-3 text-white" style="background: var(--ed-primary);">
+          <div class="small">Valeur à récupérer</div>
+          <div class="h3 fw-bold mb-0">{{ valeurTotale() | number }} FCFA</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="h6 fw-bold mb-3">Consignes actives</h2>
+    <div class="d-flex flex-column gap-3">
+      @for (groupe of groupes(); track groupe.commande.id) {
+        <div class="ed-card p-3">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <div class="small text-secondary">Réf. {{ groupe.commande.referenceUnique }}</div>
+              <div class="fw-semibold small">{{ groupe.commande.depot.nomCommerce }}</div>
+            </div>
+            <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis px-3 py-2">
+              En cours
+            </span>
+          </div>
+
+          <div class="d-flex flex-column gap-1 mb-2">
+            @for (ligne of groupe.lignes; track ligne.id) {
+              <div class="small d-flex justify-content-between">
+                <span>{{ ligne.quantite }}× {{ ligne.produitDepot.produit.nom }}</span>
+                <span class="text-secondary">{{ ligne.consigne!.montant | number }} FCFA</span>
+              </div>
+            }
+          </div>
+
+          <div class="d-flex justify-content-between fw-bold small mb-3">
+            <span>Total</span>
+            <span>{{ groupe.total | number }} FCFA</span>
+          </div>
+
+          <a [routerLink]="['/client/commandes', groupe.commande.id]" class="btn btn-sm btn-outline-primary w-100">
+            Voir le reçu complet
+          </a>
+        </div>
+      }
+    </div>
+
+    <div class="alert alert-secondary small mt-4 mb-0">
+      Rendez vos casiers vides au dépôt ou au livreur avec votre nom et référence de commande pour récupérer votre consigne (en espèces, hors application).
+    </div>
+  }
+</div>

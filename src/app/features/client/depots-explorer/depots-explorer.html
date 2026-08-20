@@ -76,6 +76,11 @@
                     <span class="small text-secondary flex-shrink-0 ms-2">{{ depot.distanceKm }} km</span>
                   }
                 </div>
+                @if (depot.nombreAvis) {
+                  <div class="small mb-1" style="color: #f59e0b;">
+                    ★ {{ depot.noteMoyenne }} <span class="text-secondary">({{ depot.nombreAvis }} avis)</span>
+                  </div>
+                }
                 <p class="small text-secondary mb-2">{{ depot.adresse }}</p>
                 <div class="d-flex gap-2 flex-wrap">
                   @if (depot.modeLivraison) {

@@ -32,12 +32,24 @@ export const CLIENT_ROUTES: Routes = [
           import('./order-confirmed/order-confirmed').then((m) => m.OrderConfirmed),
       },
       {
+        path: 'commandes/:id/avis',
+        loadComponent: () => import('./order-review/order-review').then((m) => m.OrderReview),
+      },
+      {
         path: 'commandes/:id',
         loadComponent: () => import('./order-detail/order-detail').then((m) => m.OrderDetail),
       },
       {
         path: 'compte',
         loadComponent: () => import('./account/account').then((m) => m.Account),
+      },
+      {
+        path: 'calculateur',
+        loadComponent: () => import('./calculateur/calculateur').then((m) => m.Calculateur),
+      },
+      {
+        path: 'consignes',
+        loadComponent: () => import('./consignes/consignes').then((m) => m.Consignes),
       },
     ],
   },
