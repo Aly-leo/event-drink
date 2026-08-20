@@ -10,12 +10,12 @@
         >
           {{ user.nom.slice(0, 2).toUpperCase() }}
         </span>
-        <div class="flex-grow-1">
-          <div class="fw-bold">{{ user.nom }}</div>
-          <div class="small text-secondary">{{ user.email }}</div>
+        <div class="flex-grow-1" style="min-width: 0;">
+          <div class="fw-bold text-truncate">{{ user.nom }}</div>
+          <div class="small text-secondary text-truncate">{{ user.email }}</div>
         </div>
         @if (!editing()) {
-          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="toggleEdition()">
+          <button type="button" class="btn btn-sm btn-outline-secondary flex-shrink-0" (click)="toggleEdition()">
             Modifier
           </button>
         }
