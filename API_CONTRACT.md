@@ -158,7 +158,26 @@ Détail d'un dépôt (n'importe quel statut) + son catalogue + ses avis. 404 si 
 ```
 
 ### `GET /depots/me` — rôle `DEPOT`
-Le dépôt du compte connecté (résolu par `ownerId`). Renvoie `null` si pas encore de dépôt (utile pour détecter si l'inscription dépôt reste à faire).
+Le dépôt du compte connecté (résolu par `ownerId`). Renvoie `null` si pas encore de dépôt (utile pour détecter si l'inscription dépôt reste à faire — c'est ce que le front utilise pour rediriger vers l'onboarding).
+
+### `POST /depots/me` — rôle `DEPOT`
+Complète l'inscription du dépôt (étape "onboarding" après `POST /auth/register` avec `role: DEPOT`, qui ne crée que le `User`).
+```json
+{
+  "nomCommerce": "Depot Centrale Akwa",
+  "telephone": "+237600000002",
+  "adresse": "Boulevard de la Liberté, Akwa, Douala",
+  "latitude": 4.0511,
+  "longitude": 9.7015,
+  "modeLivraison": true,
+  "modeRetrait": true,
+  "fraisLivraison": 500
+}
+```
+`modeLivraison`/`modeRetrait`/`fraisLivraison` optionnels (défauts `false`/`true`/`0`). Le `statut` n'est jamais accepté du client : toujours créé `EN_ATTENTE`, validé ensuite par un admin (`PATCH /admin/depots/:id/valider`). Réponse `201`. Erreur `409 Conflict` si le compte a déjà un dépôt.
+
+### `PATCH /depots/me` — rôle `DEPOT`
+Met à jour le profil du dépôt du compte connecté. Mêmes champs que `POST /depots/me`, tous optionnels, plus `visuelUrl`. 404 si pas de dépôt associé.
 
 ### `GET /depots/me/produits` — rôle `DEPOT`
 `ProduitDepot[]` (avec `produit` inclus) du dépôt du compte connecté. 404 si pas de dépôt associé.
@@ -305,6 +324,7 @@ Réponse `201` — `Commande` complète :
   "clientId": "clx...",
   "depotId": "clx...",
   "depot": { "id": "clx...", "nomCommerce": "...", "telephone": "...", "adresse": "..." },
+  "client": { "id": "clx...", "nom": "Client Démo", "telephone": "+237600000001" },
   "mode": "LIVRAISON",
   "statut": "EN_ATTENTE",
   "montantTotal": 9277,
@@ -337,7 +357,7 @@ Historique du client connecté (`Commande[]`, même forme que ci-dessus), tri `c
 Tout rôle authentifié. Le service vérifie l'appartenance (`CLIENT` → doit être le sien, `DEPOT` → doit posséder le dépôt lié, `ADMIN` → toujours autorisé). **404** (jamais 403) si non autorisé.
 
 ### `GET /commandes/depot/mine` — rôle `DEPOT`
-Commandes reçues par le dépôt du compte connecté (résolu via `ownerId`, jamais un `depotId` arbitraire).
+Commandes reçues par le dépôt du compte connecté (résolu via `ownerId`, jamais un `depotId` arbitraire). Inclut `client: { id, nom, telephone }` pour permettre au dépôt de contacter le client (utilisé par l'espace dépôt).
 
 ### `PATCH /commandes/:id/statut` — rôle `DEPOT`
 ```json
