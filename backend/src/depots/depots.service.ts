@@ -4,6 +4,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { DepotsQueryDto } from './dto/depots-query.dto';
 import { AddProduitDepotDto } from './dto/add-produit-depot.dto';
 import { UpdateProduitDepotDto } from './dto/update-produit-depot.dto';
+import { CreateMyDepotDto } from './dto/create-my-depot.dto';
+import { UpdateMyDepotDto } from './dto/update-my-depot.dto';
 
 function distanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
@@ -90,6 +92,31 @@ export class DepotsService {
 
   findMyDepot(ownerId: string) {
     return this.prisma.depot.findUnique({ where: { ownerId } });
+  }
+
+  async createMyDepot(ownerId: string, dto: CreateMyDepotDto) {
+    const existing = await this.findMyDepot(ownerId);
+    if (existing) {
+      throw new ConflictException('Vous avez déjà un dépôt enregistré.');
+    }
+    return this.prisma.depot.create({
+      data: {
+        ownerId,
+        nomCommerce: dto.nomCommerce,
+        telephone: dto.telephone,
+        adresse: dto.adresse,
+        latitude: dto.latitude,
+        longitude: dto.longitude,
+        modeLivraison: dto.modeLivraison ?? false,
+        modeRetrait: dto.modeRetrait ?? true,
+        fraisLivraison: dto.fraisLivraison ?? 0,
+      },
+    });
+  }
+
+  async updateMyDepot(ownerId: string, dto: UpdateMyDepotDto) {
+    const depot = await this.requireMyDepot(ownerId);
+    return this.prisma.depot.update({ where: { id: depot.id }, data: dto });
   }
 
   async findMyProduits(ownerId: string) {

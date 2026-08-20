@@ -5,6 +5,7 @@ import { CreateCommandeDto } from './dto/create-commande.dto';
 
 const INCLUDE_FULL = {
   depot: { select: { id: true, nomCommerce: true, telephone: true, adresse: true } },
+  client: { select: { id: true, nom: true, telephone: true } },
   lignes: {
     include: {
       produitDepot: { include: { produit: true } },
