@@ -17,11 +17,16 @@ export class Login {
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly showPassword = signal(false);
 
   readonly form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
   });
+
+  toggleShowPassword(): void {
+    this.showPassword.update((v) => !v);
+  }
 
   submit(): void {
     if (this.form.invalid) {

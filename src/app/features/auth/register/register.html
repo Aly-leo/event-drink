@@ -44,13 +44,23 @@
 
       <div class="mb-3">
         <label for="password" class="form-label">Mot de passe</label>
-        <input
-          id="password"
-          type="password"
-          class="form-control"
-          formControlName="password"
-          autocomplete="new-password"
-        />
+        <div class="input-group">
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            class="form-control"
+            formControlName="password"
+            autocomplete="new-password"
+          />
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="toggleShowPassword()"
+            [attr.aria-label]="showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+          >
+            <i class="bi" [class.bi-eye]="!showPassword()" [class.bi-eye-slash]="showPassword()"></i>
+          </button>
+        </div>
         @if (form.controls.password.invalid && form.controls.password.touched) {
           <div class="form-text text-danger">8 caractères minimum.</div>
         }
