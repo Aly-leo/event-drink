@@ -45,6 +45,17 @@ export class AuthService {
       .pipe(tap((res) => this.setSession(res)));
   }
 
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/mot-de-passe-oublie`, { email });
+  }
+
+  resetPassword(token: string, password: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/reinitialiser-mot-de-passe`, {
+      token,
+      password,
+    });
+  }
+
   updateProfile(payload: UpdateProfilePayload): Observable<User> {
     return this.http.patch<User>(`${environment.apiUrl}/auth/me`, payload).pipe(
       tap((user) => {

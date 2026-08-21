@@ -2,9 +2,11 @@ name: Garder le backend Render eveille
 
 on:
   schedule:
-    # Toutes les 10 min : le tier gratuit de Render s'endort apres ~15 min
-    # d'inactivite, ce ping l'empeche de s'endormir pendant les tests.
-    - cron: '*/10 * * * *'
+    # Toutes les 10 min, mais seulement 7h-23h UTC : le tier gratuit de
+    # Render a un quota d'heures mensuelles limite. Le faire tourner 24h/24
+    # le consomme trop vite (et peut suspendre le service). On le garde
+    # eveille pendant les heures de test/demo, pas la nuit.
+    - cron: '*/10 7-23 * * *'
   workflow_dispatch: {}
 
 jobs:

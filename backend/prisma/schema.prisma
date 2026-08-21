@@ -78,12 +78,26 @@ model User {
   role      Role
   createdAt DateTime @default(now())
 
-  depot     Depot?
-  commandes Commande[]
-  plaintes  Plainte[]
-  avis      Avis[]
+  depot       Depot?
+  commandes   Commande[]
+  plaintes    Plainte[]
+  avis        Avis[]
+  resetTokens PasswordResetToken[]
 
   @@map("users")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("password_reset_tokens")
 }
 
 model Depot {

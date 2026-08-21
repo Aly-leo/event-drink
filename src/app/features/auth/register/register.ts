@@ -18,6 +18,7 @@ export class Register {
   readonly Role = Role;
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly showPassword = signal(false);
 
   readonly form = this.fb.group({
     nom: ['', [Validators.required]],
@@ -26,6 +27,10 @@ export class Register {
     password: ['', [Validators.required, Validators.minLength(8)]],
     role: [Role.CLIENT, [Validators.required]],
   });
+
+  toggleShowPassword(): void {
+    this.showPassword.update((v) => !v);
+  }
 
   submit(): void {
     if (this.form.invalid) {
