@@ -1,11 +1,10 @@
-name: Garder le backend Render eveille
+name: Verifier que le backend Railway repond
 
 on:
   schedule:
-    # Toutes les 10 min, mais seulement 7h-23h UTC : le tier gratuit de
-    # Render a un quota d'heures mensuelles limite. Le faire tourner 24h/24
-    # le consomme trop vite (et peut suspendre le service). On le garde
-    # eveille pendant les heures de test/demo, pas la nuit.
+    # Railway ne met pas le service en veille comme le tier gratuit de
+    # Render : ce ping n'est plus indispensable, garde juste un
+    # monitoring leger pendant les heures de test/demo.
     - cron: '*/10 7-23 * * *'
   workflow_dispatch: {}
 
@@ -14,4 +13,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping le backend
-        run: curl -sf -o /dev/null -w "HTTP %{http_code} en %{time_total}s\n" https://event-drink.onrender.com/ || true
+        run: curl -sf -o /dev/null -w "HTTP %{http_code} en %{time_total}s\n" https://event-drink-production.up.railway.app/ || true
