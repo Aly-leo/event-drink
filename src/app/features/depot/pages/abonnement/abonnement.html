@@ -1,0 +1,120 @@
+<div class="p-3 p-md-4">
+  <div class="mx-auto" style="max-width: 900px;">
+
+    <div class="mb-4">
+      <h1 class="h4 fw-bold mb-1">Mon abonnement</h1>
+      <p class="text-secondary mb-0">Gérez votre visibilité et vos avantages sur Eventdrink.</p>
+    </div>
+
+    @if (statut() !== 'ACTIF') {
+      <div class="alert alert-warning d-flex align-items-center gap-3 shadow-sm mb-4">
+        <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+        <div>
+          <strong>{{ labelStatut(statut()) }}</strong> — votre dépôt n'est plus visible par les clients tant que l'abonnement n'est pas renouvelé.
+        </div>
+      </div>
+    }
+
+    <!-- Statut actuel -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body p-4">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-3">
+          <div>
+            <span class="badge {{ badgeStatut(statut()) }} mb-2">{{ labelStatut(statut()) }}</span>
+            <h2 class="h5 fw-bold mb-0">Palier {{ paliers[palierActuel()].label }}</h2>
+          </div>
+          <div class="text-sm-end">
+            <div class="h4 fw-bold text-primary mb-0">{{ prixActuel() | number:'1.0-0' }} FCFA<span class="fs-6 text-secondary">/mois</span></div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2 text-secondary small mb-3">
+          <i class="bi bi-calendar-check"></i>
+          <span>Prochain renouvellement le <strong>{{ dateRenouvellement() }}</strong></span>
+        </div>
+        <button type="button" class="btn btn-primary d-flex align-items-center gap-2" (click)="renouvelerMaintenant()">
+          <i class="bi bi-credit-card"></i> Renouveler maintenant
+        </button>
+      </div>
+    </div>
+
+    <!-- Paliers disponibles -->
+    <div class="mb-4">
+      <h2 class="h6 fw-semibold mb-3">Choisir un palier</h2>
+      <div class="row g-3">
+        <!-- Utilisation de clesPaliers (déclaré dans le TS) -->
+        @for (cle of clesPaliers; track cle) {
+          <div class="col-12 col-md-6">
+            <div class="card h-100 shadow-sm" [class.border-primary]="palierActuel() === cle" [class.border-2]="palierActuel() === cle">
+              <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <h3 class="h6 fw-bold mb-0">{{ paliers[cle].label }}</h3>
+                  @if (palierActuel() === cle) {
+                    <span class="badge bg-primary">Palier actuel</span>
+                  }
+                </div>
+                <div class="h4 fw-bold text-primary mb-3">{{ paliers[cle].prix | number:'1.0-0' }} FCFA<span class="fs-6 text-secondary fw-normal">/mois</span></div>
+                
+                <ul class="list-unstyled small text-secondary flex-grow-1 mb-3">
+                  <!-- Correction ici : paliers[cle].avantages -->
+                  @for (avantage of paliers[cle].avantages; track avantage) {
+                    <li class="d-flex align-items-start gap-2 mb-2">
+                      <i class="bi bi-check-circle-fill text-success flex-shrink-0 mt-1"></i>
+                      <span>{{ avantage }}</span>
+                    </li>
+                  }
+                </ul>
+
+                @if (palierActuel() !== cle) {
+                  <!-- Suppression de $any() -->
+                  <button type="button" class="btn btn-outline-primary w-100" (click)="changerPalier(cle)">
+                    Passer à ce palier
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Historique des paiements -->
+    <div class="card shadow-sm">
+      <div class="card-header bg-white border-bottom py-3">
+        <h2 class="h6 fw-semibold mb-0"><i class="bi bi-receipt me-2"></i>Historique des paiements</h2>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr class="small text-secondary">
+                <th class="ps-3">Date</th>
+                <th>Référence</th>
+                <th>Palier</th>
+                <th class="text-end">Montant</th>
+                <th class="text-end pe-3">Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (paiement of historique(); track paiement.id) {
+                <tr>
+                  <td class="ps-3">{{ paiement.date }}</td>
+                  <td class="text-secondary small">{{ paiement.reference }}</td>
+                  <td>{{ paliers[paiement.palier].label }}</td>
+                  <td class="text-end fw-semibold">{{ paiement.montant | number:'1.0-0' }} FCFA</td>
+                  <td class="text-end pe-3">
+                    <span class="badge" [class.bg-success-subtle]="paiement.statut === 'REUSSI'" [class.text-success]="paiement.statut === 'REUSSI'" [class.bg-danger-subtle]="paiement.statut === 'ECHOUE'" [class.text-danger]="paiement.statut === 'ECHOUE'">
+                      {{ paiement.statut === 'REUSSI' ? 'Réussi' : 'Échoué' }}
+                    </span>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="5" class="text-center text-secondary py-4">Aucun paiement enregistré.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

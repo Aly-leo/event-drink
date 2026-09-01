@@ -21,6 +21,7 @@ export class DepotLayout {
     { label: 'Tableau de bord', route: '/depot/dashboard', icone: 'bi-speedometer2' },
     { label: 'Catalogue', route: '/depot/catalogues', icone: 'bi-box-seam' },
     { label: 'Commandes', route: '/depot/commandes', icone: 'bi-cart3' },
+    { label: 'Abonnement', route: '/depot/abonnement', icone: 'bi-credit-card' },
     { label: 'Consignes', route: '/depot/consignes', icone: 'bi-arrow-repeat' },
     { label: 'Paramètres', route: '/depot/setting', icone: 'bi-gear' },
   ];
@@ -29,6 +30,8 @@ export class DepotLayout {
     { label: 'Accueil', route: '/depot/dashboard', icone: 'bi-speedometer2' },
     { label: 'Catalogue', route: '/depot/catalogues', icone: 'bi-box-seam' },
     { label: 'Commandes', route: '/depot/commandes', icone: 'bi-cart3' },
+    { label: 'Abonnement', route: '/depot/abonnement', icone: 'bi-credit-card' },
+    { label: 'Consignes', route: '/depot/consignes', icone: 'bi-arrow-repeat' },
     { label: 'Compte', route: '/depot/compte', icone: 'bi-person' },
   ];
 

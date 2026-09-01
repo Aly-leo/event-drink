@@ -1,0 +1,133 @@
+<div class="p-3 p-md-4">
+  <div class="mx-auto" style="max-width: 560px;">
+
+    <a routerLink="/depot/abonnement" class="text-secondary text-decoration-none d-flex align-items-center gap-1 mb-4">
+      <i class="bi bi-arrow-left"></i><span class="small fw-semibold">Retour à mon abonnement</span>
+    </a>
+
+    <!-- Étape FORMULAIRE -->
+    @if (etape() === 'FORMULAIRE') {
+
+      <!-- Récap du palier choisi -->
+      <div class="card shadow-sm mb-4" [style.border-color]="detailActuel().couleur" style="border-width: 2px;">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <span class="badge mb-2" [style.background-color]="detailActuel().couleur" style="color: white;">Palier {{ detailActuel().label }}</span>
+              <h1 class="h5 fw-bold mb-0">Renouvellement de l'abonnement</h1>
+            </div>
+            <div class="h4 fw-bold mb-0" [style.color]="detailActuel().couleur">{{ detailActuel().prix | number:'1.0-0' }} FCFA</div>
+          </div>
+          <ul class="list-unstyled small text-secondary mb-0">
+            @for (avantage of detailActuel().avantages; track avantage) {
+              <li class="d-flex align-items-start gap-2 mb-1">
+                <i class="bi bi-check-circle-fill text-success flex-shrink-0 mt-1"></i><span>{{ avantage }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+
+      <!-- Formulaire de paiement -->
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h2 class="h6 fw-semibold mb-3">Choisissez votre opérateur</h2>
+
+          <div class="row g-2 mb-4">
+            <div class="col-6">
+              <button
+                type="button"
+                class="btn w-100 py-3 d-flex flex-column align-items-center gap-2"
+                [class.btn-outline-secondary ]="operateur() !== 'ORANGE_MONEY'"
+                [class.btn-primary]="operateur() === 'ORANGE_MONEY'"
+                (click)="choisirOperateur('ORANGE_MONEY')"
+              >
+                <i class="bi bi-phone fs-3"></i>
+                <span class="small fw-semibold">Orange Money</span>
+              </button>
+            </div>
+            <div class="col-6">
+              <button
+                type="button"
+                class="btn w-100 py-3 d-flex flex-column align-items-center gap-2"
+                [class.btn-outline-secondary]="operateur() !== 'MTN_MOMO'"
+                [class.btn-warning]="operateur() === 'MTN_MOMO'"
+                (click)="choisirOperateur('MTN_MOMO')"
+              >
+                <i class="bi bi-phone fs-3"></i>
+                <span class="small fw-semibold">MTN MoMo</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="telephone" class="form-label">Numéro de téléphone</label>
+            <input
+              id="telephone"
+              type="tel"
+              class="form-control rounded-pill px-3"
+              placeholder="+237 6XX XXX XXX"
+              [ngModel]="numeroTelephone()"
+              (ngModelChange)="numeroTelephone.set($event)"
+            />
+            <div class="form-text">Le numéro associé à votre compte {{ operateur() === 'ORANGE_MONEY' ? 'Orange Money' : 'MTN MoMo' }}.</div>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary w-100 rounded-pill py-2 d-flex align-items-center justify-content-center gap-2"
+            [disabled]="!numeroValide()"
+            (click)="confirmerPaiement()"
+          >
+            <i class="bi bi-credit-card"></i>
+            Payer {{ detailActuel().prix | number:'1.0-0' }} FCFA
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Étape EN_COURS -->
+    @if (etape() === 'EN_COURS') {
+      <div class="card shadow-sm">
+        <div class="card-body p-5 text-center">
+          <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+          <h2 class="h5 fw-bold mb-2">Paiement en cours...</h2>
+          <p class="text-secondary mb-0">Confirmez la transaction sur votre téléphone si une demande apparaît.</p>
+        </div>
+      </div>
+    }
+
+    <!-- Étape REUSSI -->
+    @if (etape() === 'REUSSI') {
+      <div class="card shadow-sm">
+        <div class="card-body p-5 text-center">
+          <div class="rounded-circle bg-success-subtle text-success d-inline-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px;">
+            <i class="bi bi-check-lg fs-1"></i>
+          </div>
+          <h2 class="h5 fw-bold mb-2">Paiement réussi</h2>
+          <p class="text-secondary mb-4">Votre abonnement {{ detailActuel().label }} est actif jusqu'au mois prochain.</p>
+          <button type="button" class="btn btn-primary rounded-pill px-4" (click)="retourAbonnement()">
+            Retour à mon abonnement
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Étape ECHEC -->
+    @if (etape() === 'ECHEC') {
+      <div class="card shadow-sm">
+        <div class="card-body p-5 text-center">
+          <div class="rounded-circle bg-danger-subtle text-danger d-inline-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px;">
+            <i class="bi bi-x-lg fs-1"></i>
+          </div>
+          <h2 class="h5 fw-bold mb-2">Le paiement a échoué</h2>
+          <p class="text-secondary mb-4">Vérifiez votre solde ou réessayez.</p>
+          <button type="button" class="btn btn-primary rounded-pill px-4" (click)="reessayer()">
+            Réessayer
+          </button>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>
