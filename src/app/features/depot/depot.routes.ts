@@ -26,6 +26,10 @@ export const DEPOT_ROUTES: Routes = [
         path: 'stocks',
         loadComponent: () => import('./pages/depot-stocks/depot-stocks').then((m) => m.DepotStocks),
       },
+      {
+        path: 'statistiques',
+        loadComponent: () => import('./pages/depot-statistiques/depot-statistiques').then((m) => m.DepotStatistiques),
+      },
       { path: 'abonnement', loadComponent: () => import('./pages/abonnement/abonnement').then((m) => m.Abonnement) },
       { path: 'setting', loadComponent: () => import('./pages/depot-setting/depot-setting').then((m) => m.DepotSetting) },
       { path: 'compte', loadComponent: () => import('./pages/compte/compte').then((m) => m.Compte) },
