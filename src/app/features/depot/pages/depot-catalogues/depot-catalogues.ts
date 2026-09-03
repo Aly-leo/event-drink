@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { CatalogueService } from '../../../../core/services/catalogue.service';
 import { DepotsService } from '../../../../core/services/depots.service';
@@ -14,7 +15,7 @@ interface OptionCategorie {
 @Component({
   selector: 'app-depot-catalogues',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './depot-catalogues.html',
   styleUrl: './depot-catalogues.scss',
 })

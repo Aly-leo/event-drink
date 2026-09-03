@@ -1,6 +1,8 @@
 import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+
 
 export type CategorieProduit = 'BIERE_LOCALE' | 'VIN' | 'SPIRITUEUX' | 'SOFT' | 'MATERIEL';
 export type TypeMouvement = 'ENTREE' | 'SORTIE';
@@ -33,7 +35,7 @@ interface OptionCategorie {
 
 @Component({
   selector: 'app-depot-stocks',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,RouterLink],
   templateUrl: './depot-stocks.html',
   styleUrl: './depot-stocks.scss',
 })
