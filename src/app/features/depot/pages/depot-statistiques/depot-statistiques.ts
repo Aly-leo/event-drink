@@ -1,5 +1,6 @@
 import { Component, signal, computed, viewChild, ElementRef, effect, afterNextRender, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -25,7 +26,7 @@ interface DonneesPeriode {
 @Component({
   selector: 'app-depot-statistiques',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,RouterLink],
   templateUrl: './depot-statistiques.html',
   styleUrl: './depot-statistiques.scss',
 })

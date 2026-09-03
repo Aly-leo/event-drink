@@ -24,7 +24,7 @@ export class DepotLayout {
     { label: 'Abonnement', route: '/depot/abonnement', icone: 'bi-credit-card' },
     { label: 'Consignes', route: '/depot/consignes', icone: 'bi-arrow-repeat' },
     { label: 'Stocks', route: '/depot/stocks', icone: 'bi-boxes' },
-    { label: 'Statistiques', route: '/depot/statistiques', icone: 'bi-bar-chart' },
+    // { label: 'Statistiques', route: '/depot/statistiques', icone: 'bi-bar-chart' },
     { label: 'Paramètres', route: '/depot/setting', icone: 'bi-gear' },
   ];
 
@@ -35,8 +35,7 @@ export class DepotLayout {
     { label: 'Abonnement', route: '/depot/abonnement', icone: 'bi-credit-card' },
     { label: 'Consignes', route: '/depot/consignes', icone: 'bi-arrow-repeat' },
     { label: 'Stocks', route: '/depot/stocks', icone: 'bi-boxes' },
-    { label: 'Statistiques', route: '/depot/statistiques', icone: 'bi-bar-chart' },
-    { label: 'Compte', route: '/depot/compte', icone: 'bi-person' },
+    // { label: 'Statistiques', route: '/depot/statistiques', icone: 'bi-bar-chart' },
   ];
 
   constructor(protected authService: AuthService, private router: Router) {}

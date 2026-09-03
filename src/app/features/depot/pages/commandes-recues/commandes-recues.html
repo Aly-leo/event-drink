@@ -34,7 +34,7 @@
 
       <div class="row g-3">
         @for (commande of commandesFiltrees(); track commande.id) {
-          <div class="col-12 col-lg-6">
+          <div class="col-12 ">
             <a [routerLink]="['/depot/commandes', commande.id]" class="card shadow-sm border-0 h-100 text-decoration-none text-reset {{ getBorderClass(commande.statut) }}" [class.opacity-75]="commande.statut === 'LIVREE' || commande.statut === 'TERMINEE'">
               <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-3">
