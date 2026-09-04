@@ -22,10 +22,6 @@ export const DEPOT_ROUTES: Routes = [
         path: 'abonnement/paiement/:palier',
         loadComponent: () => import('./pages/depot-abonnement-paiement/depot-abonnement-paiement').then((m) => m.DepotAbonnementPaiement),
       },
-      {
-        path: 'stocks',
-        loadComponent: () => import('./pages/depot-stocks/depot-stocks').then((m) => m.DepotStocks),
-      },
       { path: 'abonnement', loadComponent: () => import('./pages/abonnement/abonnement').then((m) => m.Abonnement) },
       { path: 'setting', loadComponent: () => import('./pages/depot-setting/depot-setting').then((m) => m.DepotSetting) },
       { path: 'compte', loadComponent: () => import('./pages/compte/compte').then((m) => m.Compte) },

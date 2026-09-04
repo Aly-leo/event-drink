@@ -23,7 +23,6 @@ export class DepotLayout {
     { label: 'Commandes', route: '/depot/commandes', icone: 'bi-cart3' },
     { label: 'Abonnement', route: '/depot/abonnement', icone: 'bi-credit-card' },
     { label: 'Consignes', route: '/depot/consignes', icone: 'bi-arrow-repeat' },
-    // { label: 'Stocks', route: '/depot/stocks', icone: 'bi-boxes' },
     { label: 'Paramètres', route: '/depot/setting', icone: 'bi-gear' },
   ];
 
@@ -33,7 +32,6 @@ export class DepotLayout {
     { label: 'Commandes', route: '/depot/commandes', icone: 'bi-cart3' },
     { label: 'Abonnement', route: '/depot/abonnement', icone: 'bi-credit-card' },
     { label: 'Consignes', route: '/depot/consignes', icone: 'bi-arrow-repeat' },
-    // { label: 'Stocks', route: '/depot/stocks', icone: 'bi-boxes' },
     { label: 'Compte', route: '/depot/compte', icone: 'bi-person' },
   ];
 
