@@ -594,11 +594,9 @@
 
 
 
-
 <div class="p-3 p-md-4">
   <div class="mx-auto" style="max-width: 1400px;">
 
-    <!-- En-tête de la page -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
       <div>
         <h1 class="h4 fw-bold mb-1">Catalogue & Gestion des Stocks</h1>
@@ -611,7 +609,6 @@
       </div>
     </div>
 
-    <!-- Alerte stock faible -->
     @if (produitsEnAlerte().length > 0) {
       <div class="alert alert-warning d-flex align-items-center gap-3 shadow-sm mb-4">
         <i class="bi bi-exclamation-triangle-fill fs-4"></i>
@@ -636,7 +633,6 @@
       </div>
     } @else {
 
-      <!-- Barre d'outils et de filtres -->
       <div class="card shadow-sm mb-3">
         <div class="card-body d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
           <div class="input-group" style="max-width:340px;">
@@ -668,7 +664,6 @@
         </div>
       </div>
 
-      <!-- TABLEAU UNIQUE AVEC SCROLL HORIZONTAL AU BESOIN -->
       <div class="card shadow-sm mb-4">
         <div class="card-body p-0">
           <div class="table-responsive">
@@ -689,32 +684,26 @@
               <tbody>
                 @for (pd of produitsFiltres(); track pd.id) {
                   <tr [class.table-warning]="pd.quantiteActuelle <= pd.seuilAlerte" [class.opacity-75]="!pd.disponible">
-                    <!-- Photo -->
                     <td class="ps-3">
                       <img [src]="pd.produit.visuelUrl || 'https://placehold.co/48x48/EA580C/FFFFFF?text=%20'" [alt]="pd.produit.nom" class="rounded border" style="width:44px;height:44px;object-fit:cover;">
                     </td>
-                    <!-- Nom / Marque / Contenance -->
                     <td>
                       <div class="fw-semibold">{{ pd.produit.nom }}</div>
                       <div class="small text-secondary">{{ pd.produit.marque }} · {{ pd.produit.contenance }}</div>
                     </td>
-                    <!-- Catégorie -->
                     <td>
                       <span class="badge rounded-pill text-bg-light border">{{ labelCategorie(pd.produit.categorie) }}</span>
                     </td>
-                    <!-- Prix -->
                     <td class="text-end fw-semibold">
                       {{ pd.prix | number }} FCFA
                     </td>
-                    <!-- Consigne -->
                     <td class="text-end">
-                      @if (pd.produit.estConsignable) {
+                      @if (pd.montantConsigne > 0) {
                         <span>{{ pd.montantConsigne | number }} FCFA</span>
                       } @else {
                         <span class="text-secondary">— Non consignable</span>
                       }
                     </td>
-                    <!-- Switch Disponibilité -->
                     <td class="text-center">
                       <div class="form-check form-switch d-inline-block mb-0">
                         <input class="form-check-input" type="checkbox" role="switch" [checked]="pd.disponible" (change)="toggleDisponibilite(pd)">
@@ -723,7 +712,6 @@
                         {{ pd.disponible ? 'Disponible' : 'Rupture' }}
                       </span>
                     </td>
-                    <!-- Stock Actuel & Ajustement rapide -->
                     <td class="text-center">
                       <div class="d-flex align-items-center justify-content-center gap-2">
                         <button type="button" class="btn btn-sm btn-outline-secondary" (click)="ajusterRapide(pd.id, -1)" [disabled]="pd.quantiteActuelle === 0">
@@ -735,11 +723,9 @@
                         </button>
                       </div>
                     </td>
-                    <!-- Seuil alerte -->
                     <td>
                       <input type="number" class="form-control form-control-sm" style="width: 80px;" min="0" [ngModel]="pd.seuilAlerte" (ngModelChange)="modifierSeuil(pd.id, $event)">
                     </td>
-                    <!-- Actions -->
                     <td class="text-end pe-3">
                       <div class="d-flex justify-content-end gap-1">
                         <button type="button" class="btn btn-sm btn-outline-primary" title="Mouvement de stock" (click)="ouvrirMouvement(pd)">
@@ -764,7 +750,6 @@
         </div>
       </div>
 
-      <!-- Historique des mouvements -->
       <div class="card shadow-sm">
         <div class="card-header bg-white border-bottom py-3">
           <h2 class="h6 fw-semibold mb-0"><i class="bi bi-clock-history me-2"></i>Historique des mouvements de stock</h2>
@@ -810,7 +795,6 @@
   </div>
 </div>
 
-<!-- Modal Ajout / Edition Produit -->
 @if (modalProduitOuverte()) {
   <div class="modal-backdrop fade show"></div>
   <div class="modal fade show d-block" tabindex="-1" (click)="fermerModalProduit()">
@@ -827,44 +811,67 @@
 
           @if (modeEdition()) {
             <div class="mb-3">
-              <label class="form-label">Produit</label>
-              <input type="text" class="form-control" [value]="produitSelectionneForm()?.nom" disabled>
+              <label class="form-label fw-semibold">Produit</label>
+              <input type="text" class="form-control" [value]="produitSelectionneForm()?.nom || 'Produit sélectionné'" disabled>
             </div>
           } @else {
             <div class="mb-3">
-              <label class="form-label">Produit du catalogue central</label>
-              <select class="form-select" [(ngModel)]="formulaire.produitId">
-                <option value="" disabled>Choisir un produit...</option>
+              <label class="form-label fw-semibold">Produit du catalogue central</label>
+              <select class="form-select" [ngModel]="formulaire.produitId" (ngModelChange)="onSelectProduitAjout($event)">
+                <option value="" disabled selected>Choisir un produit...</option>
                 @for (p of produitsDisponiblesAjout(); track p.id) {
                   <option [value]="p.id">{{ p.nom }} — {{ p.marque }} ({{ p.contenance }})</option>
                 }
               </select>
               @if (produitsDisponiblesAjout().length === 0) {
-                <div class="form-text">Tous les produits du catalogue central sont déjà présents.</div>
+                <div class="form-text text-warning">Tous les produits du catalogue central sont déjà présents.</div>
               }
             </div>
           }
 
           <div class="mb-3">
-            <label class="form-label">Prix unitaire (FCFA)</label>
-            <input type="number" class="form-control" [(ngModel)]="formulaire.prix" min="0">
+            <label class="form-label fw-semibold">Prix unitaire (FCFA)</label>
+            <input type="number" class="form-control" [(ngModel)]="formulaire.prix" min="0" placeholder="Ex: 600">
           </div>
 
-          @if (produitSelectionneForm()?.estConsignable ?? modeEdition()) {
-            <div class="mb-3">
-              <label class="form-label">Montant de la consigne (FCFA)</label>
-              <input type="number" class="form-control" [(ngModel)]="formulaire.montantConsigne" min="0">
+          <div class="card bg-light border-0 p-3 mb-3">
+            <div class="form-check form-switch mb-0 d-flex align-items-center justify-content-between ps-0">
+              <label class="form-check-label fw-semibold cursor-pointer" for="consigneCheck">
+                <i class="bi bi-box-seam me-1"></i> Produit consignable ?
+              </label>
+              <input 
+                class="form-check-input ms-0" 
+                type="checkbox" 
+                role="switch" 
+                id="consigneCheck"
+                [checked]="formulaire.estConsignable" 
+                (change)="toggleConsignable()">
             </div>
-          }
+
+            @if (formulaire.estConsignable) {
+              <div class="mt-3 pt-2 border-top">
+                <label class="form-label small fw-semibold text-secondary">Montant de la consigne (FCFA)</label>
+                <div class="input-group">
+                  <input 
+                    type="number" 
+                    class="form-control" 
+                    [(ngModel)]="formulaire.montantConsigne" 
+                    min="0" 
+                    placeholder="Ex: 200">
+                  <span class="input-group-text">FCFA</span>
+                </div>
+              </div>
+            }
+          </div>
 
           @if (!modeEdition()) {
             <div class="row g-2 mb-3">
               <div class="col-6">
-                <label class="form-label">Stock Initial</label>
+                <label class="form-label fw-semibold">Stock Initial</label>
                 <input type="number" class="form-control" [(ngModel)]="formulaire.quantiteInitial" min="0">
               </div>
               <div class="col-6">
-                <label class="form-label">Seuil d'Alerte</label>
+                <label class="form-label fw-semibold">Seuil d'Alerte</label>
                 <input type="number" class="form-control" [(ngModel)]="formulaire.seuilAlerte" min="0">
               </div>
             </div>
@@ -872,7 +879,7 @@
 
           <div class="form-check form-switch mb-0">
             <input class="form-check-input" type="checkbox" role="switch" [(ngModel)]="formulaire.disponible" id="dispoCheck">
-            <label class="form-check-label" for="dispoCheck">Disponible immédiatement</label>
+            <label class="form-check-label fw-semibold" for="dispoCheck">Disponible immédiatement en vente</label>
           </div>
         </div>
         <div class="modal-footer">
@@ -889,7 +896,6 @@
   </div>
 }
 
-<!-- Modal Mouvement de Stock -->
 @if (modalMouvementOuverte()) {
   <div class="modal-backdrop fade show"></div>
   <div class="modal fade show d-block" tabindex="-1" (click)="fermerModalMouvement()">
@@ -901,7 +907,7 @@
         </div>
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label">Type de mouvement</label>
+            <label class="form-label fw-semibold">Type de mouvement</label>
             <div class="btn-group w-100" role="group">
               <input type="radio" class="btn-check" id="type-entree" [(ngModel)]="formulaireMouvement.type" value="ENTREE">
               <label class="btn btn-outline-success" for="type-entree"><i class="bi bi-box-arrow-in-down me-1"></i>Entrée</label>
@@ -910,11 +916,11 @@
             </div>
           </div>
           <div class="mb-3">
-            <label class="form-label">Quantité</label>
+            <label class="form-label fw-semibold">Quantité</label>
             <input type="number" class="form-control" min="1" [(ngModel)]="formulaireMouvement.quantite">
           </div>
           <div class="mb-0">
-            <label class="form-label">Motif (optionnel)</label>
+            <label class="form-label fw-semibold">Motif (optionnel)</label>
             <input type="text" class="form-control" placeholder="Ex: Réapprovisionnement fournisseur" [(ngModel)]="formulaireMouvement.motif">
           </div>
         </div>

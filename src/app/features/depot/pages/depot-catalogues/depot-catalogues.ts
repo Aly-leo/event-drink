@@ -527,7 +527,6 @@
 // }
 
 
-
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -554,7 +553,6 @@ interface OptionCategorie {
   label: string;
 }
 
-// Extension locale pour la gestion du stock côté IHM
 export interface ProduitDepotAvecStock extends ProduitDepot {
   quantiteActuelle: number;
   seuilAlerte: number;
@@ -594,7 +592,6 @@ export class DepotCatalogues {
   catalogueCentral = signal<Produit[]>([]);
   mesProduits = signal<ProduitDepotAvecStock[]>([]);
 
-  // Historique des mouvements (géré en local)
   historique = signal<MouvementStock[]>([
     { id: 1, produitId: '1', produitNom: 'Exemple Bière', type: 'ENTREE', quantite: 20, motif: 'Réapprovisionnement', date: '18/08/2026 14:20' }
   ]);
@@ -618,7 +615,6 @@ export class DepotCatalogues {
 
   produitsEnAlerte = computed(() => this.mesProduits().filter((pd) => pd.quantiteActuelle <= pd.seuilAlerte));
 
-  /** Produits du catalogue central pas encore ajoutés à ce dépôt. */
   produitsDisponiblesAjout = computed(() => {
     const dejaAjoutes = new Set(this.mesProduits().map((pd) => pd.produitId));
     return this.catalogueCentral().filter((p) => !dejaAjoutes.has(p.id));
@@ -626,7 +622,6 @@ export class DepotCatalogues {
 
   produitSelectionneForm = computed(() => this.catalogueCentral().find((p) => p.id === this.formulaire.produitId) ?? null);
 
-  // Modals & Formulaires
   modalProduitOuverte = signal(false);
   modalMouvementOuverte = signal(false);
   modeEdition = signal(false);
@@ -636,7 +631,17 @@ export class DepotCatalogues {
   private produitDepotEnEdition: ProduitDepotAvecStock | null = null;
   produitSelectionneMouvement = signal<ProduitDepotAvecStock | null>(null);
 
-  formulaire = { produitId: '', prix: 0, montantConsigne: 0, disponible: true, quantiteInitial: 0, seuilAlerte: 5 };
+  // Ajout du champ boolean 'estConsignable' dans le formulaire
+  formulaire = { 
+    produitId: '', 
+    prix: 0, 
+    estConsignable: false, 
+    montantConsigne: 0, 
+    disponible: true, 
+    quantiteInitial: 0, 
+    seuilAlerte: 5 
+  };
+
   formulaireMouvement = { type: 'ENTREE' as TypeMouvement, quantite: 1, motif: '' };
 
   constructor() {
@@ -649,7 +654,6 @@ export class DepotCatalogues {
     forkJoin([this.catalogueService.getProduits(), this.depotsService.getMyProduits()]).subscribe({
       next: ([catalogue, mesProduits]) => {
         this.catalogueCentral.set(catalogue);
-        // Map local pour initialiser les champs de stock si non fournis par l'API
         this.mesProduits.set(
           mesProduits.map((p) => ({
             ...p,
@@ -670,11 +674,26 @@ export class DepotCatalogues {
     return this.categories.find((c) => c.valeur === cat)?.label ?? cat;
   }
 
-  // --- Gestion du produit (Ajout / Edition) ---
+  onSelectProduitAjout(produitId: string): void {
+    this.formulaire.produitId = produitId;
+    const prodCentral = this.catalogueCentral().find((p) => p.id === produitId);
+    if (prodCentral) {
+      this.formulaire.estConsignable = prodCentral.estConsignable ?? false;
+    }
+  }
+
   ouvrirAjout(): void {
     this.modeEdition.set(false);
     this.produitDepotEnEdition = null;
-    this.formulaire = { produitId: '', prix: 0, montantConsigne: 0, disponible: true, quantiteInitial: 0, seuilAlerte: 5 };
+    this.formulaire = { 
+      produitId: '', 
+      prix: 0, 
+      estConsignable: false, 
+      montantConsigne: 0, 
+      disponible: true, 
+      quantiteInitial: 0, 
+      seuilAlerte: 5 
+    };
     this.formError.set(null);
     this.modalProduitOuverte.set(true);
   }
@@ -682,9 +701,14 @@ export class DepotCatalogues {
   ouvrirModification(pd: ProduitDepotAvecStock): void {
     this.modeEdition.set(true);
     this.produitDepotEnEdition = pd;
+    
+    // Initialise le toggle consigne selon la présence d'un montant de consigne > 0
+    const estConsignable = pd.montantConsigne > 0 || (pd.produit?.estConsignable ?? false);
+
     this.formulaire = {
       produitId: pd.produitId,
       prix: pd.prix,
+      estConsignable: estConsignable,
       montantConsigne: pd.montantConsigne,
       disponible: pd.disponible,
       quantiteInitial: pd.quantiteActuelle,
@@ -698,14 +722,23 @@ export class DepotCatalogues {
     this.modalProduitOuverte.set(false);
   }
 
+  toggleConsignable(): void {
+    this.formulaire.estConsignable = !this.formulaire.estConsignable;
+    if (!this.formulaire.estConsignable) {
+      this.formulaire.montantConsigne = 0;
+    }
+  }
+
   enregistrer(): void {
     this.formError.set(null);
+    const consigneFinale = this.formulaire.estConsignable ? this.formulaire.montantConsigne : 0;
+
     if (this.modeEdition() && this.produitDepotEnEdition) {
       this.submitting.set(true);
       this.depotsService
         .updateMyProduit(this.produitDepotEnEdition.id, {
           prix: this.formulaire.prix,
-          montantConsigne: this.formulaire.montantConsigne,
+          montantConsigne: consigneFinale,
           disponible: this.formulaire.disponible,
         })
         .subscribe({
@@ -716,6 +749,7 @@ export class DepotCatalogues {
                   ? {
                       ...p,
                       ...updated,
+                      montantConsigne: consigneFinale,
                       seuilAlerte: this.formulaire.seuilAlerte,
                     }
                   : p
@@ -742,13 +776,14 @@ export class DepotCatalogues {
       .addMyProduit({
         produitId: this.formulaire.produitId,
         prix: this.formulaire.prix,
-        montantConsigne: this.formulaire.montantConsigne,
+        montantConsigne: consigneFinale,
         disponible: this.formulaire.disponible,
       })
       .subscribe({
         next: (created) => {
           const nouveauProduit: ProduitDepotAvecStock = {
             ...created,
+            montantConsigne: consigneFinale,
             quantiteActuelle: this.formulaire.quantiteInitial || 0,
             seuilAlerte: this.formulaire.seuilAlerte || 5,
           };
@@ -772,7 +807,6 @@ export class DepotCatalogues {
     });
   }
 
-  // --- Actions rapides de stock ---
   ajusterRapide(id: string, delta: number): void {
     this.mesProduits.update((list) =>
       list.map((p) => (p.id === id ? { ...p, quantiteActuelle: Math.max(0, p.quantiteActuelle + delta) } : p))
@@ -785,7 +819,6 @@ export class DepotCatalogues {
     );
   }
 
-  // --- Modal Mouvement Détaillé ---
   ouvrirMouvement(produit: ProduitDepotAvecStock): void {
     this.produitSelectionneMouvement.set(produit);
     this.formulaireMouvement = { type: 'ENTREE', quantite: 1, motif: '' };
