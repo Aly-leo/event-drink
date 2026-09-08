@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { CategorieProduit } from '../models/produit.model';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Depot, DepotDetail } from '../models/depot.model';
@@ -40,6 +41,24 @@ export interface CreateMouvementStockPayload {
   type: TypeMouvementStock;
   quantite: number;
   motif?: string;
+}
+
+export interface VenteProduit {
+  nom: string;
+  quantiteVendue: number;
+  chiffreAffaires: number;
+}
+
+export interface StatistiquesDepot {
+  kpis: {
+    chiffreAffairesTotal: number;
+    commandesTotal: number;
+    panierMoyen: number;
+    croissance: number;
+  };
+  evolution: { labels: string[]; valeurs: number[] };
+  repartitionCategories: { labels: CategorieProduit[]; valeurs: number[] };
+  topProduits: VenteProduit[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -96,5 +115,11 @@ export class DepotsService {
 
   getMesMouvements(): Observable<MouvementStock[]> {
     return this.http.get<MouvementStock[]>(`${environment.apiUrl}/depots/me/mouvements`);
+  }
+
+  getMesStatistiques(jours: 7 | 30 | 90): Observable<StatistiquesDepot> {
+    return this.http.get<StatistiquesDepot>(`${environment.apiUrl}/depots/me/statistiques`, {
+      params: new HttpParams({ fromObject: { jours: String(jours) } }),
+    });
   }
 }
