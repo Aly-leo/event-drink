@@ -1,10 +1,10 @@
-import { Component, signal, computed, inject, input} from '@angular/core';
+import { Component, signal, computed, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AbonnementService } from '../../../../core/services/abonnement.service';
+import { OperateurPaiement, PalierAbonnement } from '../../../../core/models/abonnement.model';
 
-export type PalierAbonnement = 'STANDARD' | 'PREMIUM';
-export type OperateurPaiement = 'ORANGE_MONEY' | 'MTN_MOMO';
 export type EtapePaiement = 'FORMULAIRE' | 'EN_COURS' | 'REUSSI' | 'ECHEC';
 
 interface DetailPalier {
@@ -21,15 +21,16 @@ interface DetailPalier {
   styleUrl: './depot-abonnement-paiement.scss',
 })
 export class DepotAbonnementPaiement {
-  private router = inject(Router);
+  private readonly router = inject(Router);
+  private readonly abonnementService = inject(AbonnementService);
 
-  // Remplace l'accès manuel à ActivatedRoute et ngOnInit() via la route binding
+  readonly OperateurPaiement = OperateurPaiement;
+
   palierRoute = input<string>('', { alias: 'palier' });
 
-  // Signal calculé automatiquement pour garder le fallback 'STANDARD'
   palier = computed<PalierAbonnement>(() => {
     const val = this.palierRoute();
-    return val === 'PREMIUM' ? 'PREMIUM' : 'STANDARD';
+    return val === 'PREMIUM' ? PalierAbonnement.PREMIUM : PalierAbonnement.STANDARD;
   });
 
   details: Record<PalierAbonnement, DetailPalier> = {
@@ -50,14 +51,14 @@ export class DepotAbonnementPaiement {
   detailActuel = computed(() => this.details[this.palier()]);
 
   etape = signal<EtapePaiement>('FORMULAIRE');
-  operateur = signal<OperateurPaiement>('ORANGE_MONEY');
+  operateur = signal<OperateurPaiement>(OperateurPaiement.ORANGE_MONEY);
   numeroTelephone = signal('');
+  erreur = signal<string | null>(null);
 
   numeroValide = computed(() => {
-  const numero = this.numeroTelephone().replace(/\s/g, '');
-
-  return /^(6[0-9]{8}|\+2376[0-9]{8})$/.test(numero);
-});
+    const numero = this.numeroTelephone().replace(/\s/g, '');
+    return /^(6[0-9]{8}|\+2376[0-9]{8})$/.test(numero);
+  });
 
   choisirOperateur(op: OperateurPaiement) {
     this.operateur.set(op);
@@ -67,10 +68,21 @@ export class DepotAbonnementPaiement {
     if (!this.numeroValide()) return;
 
     this.etape.set('EN_COURS');
+    this.erreur.set(null);
 
-    setTimeout(() => {
-      this.etape.set('REUSSI');
-    }, 2000);
+    this.abonnementService
+      .payer({
+        palier: this.palier(),
+        operateur: this.operateur(),
+        numeroTelephone: this.numeroTelephone().replace(/\s/g, ''),
+      })
+      .subscribe({
+        next: () => this.etape.set('REUSSI'),
+        error: (err) => {
+          this.erreur.set(err?.error?.message ?? 'Le paiement a échoué.');
+          this.etape.set('ECHEC');
+        },
+      });
   }
 
   retourAbonnement() {

@@ -1,11 +1,12 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, StatutDepot } from '@prisma/client';
+import { Prisma, StatutDepot, TypeMouvementStock } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { DepotsQueryDto } from './dto/depots-query.dto';
 import { AddProduitDepotDto } from './dto/add-produit-depot.dto';
 import { UpdateProduitDepotDto } from './dto/update-produit-depot.dto';
 import { CreateMyDepotDto } from './dto/create-my-depot.dto';
 import { UpdateMyDepotDto } from './dto/update-my-depot.dto';
+import { CreateMouvementStockDto } from './dto/create-mouvement-stock.dto';
 
 function distanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
@@ -137,6 +138,8 @@ export class DepotsService {
           prix: dto.prix,
           montantConsigne: dto.montantConsigne ?? 0,
           disponible: dto.disponible ?? true,
+          quantiteStock: dto.quantiteStock ?? 0,
+          seuilAlerte: dto.seuilAlerte ?? 5,
         },
         include: { produit: true },
       });
@@ -160,6 +163,45 @@ export class DepotsService {
       where: { id: produitDepotId },
       data: dto,
       include: { produit: true },
+    });
+  }
+
+  async creerMouvement(ownerId: string, produitDepotId: string, dto: CreateMouvementStockDto) {
+    const depot = await this.requireMyDepot(ownerId);
+    const produitDepot = await this.prisma.produitDepot.findUnique({ where: { id: produitDepotId } });
+    if (!produitDepot || produitDepot.depotId !== depot.id) {
+      throw new NotFoundException("Entrée de catalogue introuvable pour votre dépôt.");
+    }
+
+    const delta = dto.type === TypeMouvementStock.ENTREE ? dto.quantite : -dto.quantite;
+    const nouvelleQuantite = Math.max(0, produitDepot.quantiteStock + delta);
+
+    const [produitDepotMaJ, mouvement] = await this.prisma.$transaction([
+      this.prisma.produitDepot.update({
+        where: { id: produitDepotId },
+        data: { quantiteStock: nouvelleQuantite },
+        include: { produit: true },
+      }),
+      this.prisma.mouvementStock.create({
+        data: {
+          produitDepotId,
+          type: dto.type,
+          quantite: dto.quantite,
+          motif: dto.motif,
+        },
+        include: { produitDepot: { include: { produit: true } } },
+      }),
+    ]);
+
+    return { produitDepot: produitDepotMaJ, mouvement };
+  }
+
+  async findMesMouvements(ownerId: string) {
+    const depot = await this.requireMyDepot(ownerId);
+    return this.prisma.mouvementStock.findMany({
+      where: { produitDepot: { depotId: depot.id } },
+      include: { produitDepot: { include: { produit: true } } },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

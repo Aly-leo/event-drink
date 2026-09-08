@@ -87,7 +87,7 @@
               </thead>
               <tbody>
                 @for (pd of produitsFiltres(); track pd.id) {
-                  <tr [class.table-warning]="pd.quantiteActuelle <= pd.seuilAlerte" [class.opacity-75]="!pd.disponible">
+                  <tr [class.table-warning]="pd.quantiteStock <= pd.seuilAlerte" [class.opacity-75]="!pd.disponible">
                     <td class="ps-3">
                       <img [src]="pd.produit.visuelUrl || 'https://placehold.co/48x48/EA580C/FFFFFF?text=%20'" [alt]="pd.produit.nom" class="rounded border" style="width:44px;height:44px;object-fit:cover;">
                     </td>
@@ -118,17 +118,17 @@
                     </td>
                     <td class="text-center">
                       <div class="d-flex align-items-center justify-content-center gap-2">
-                        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="ajusterRapide(pd.id, -1)" [disabled]="pd.quantiteActuelle === 0">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="ajusterRapide(pd, -1)" [disabled]="pd.quantiteStock === 0 || mouvementEnCours()">
                           <i class="bi bi-dash"></i>
                         </button>
-                        <span class="fw-bold fs-6" [class.text-danger]="pd.quantiteActuelle <= pd.seuilAlerte">{{ pd.quantiteActuelle }}</span>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="ajusterRapide(pd.id, 1)">
+                        <span class="fw-bold fs-6" [class.text-danger]="pd.quantiteStock <= pd.seuilAlerte">{{ pd.quantiteStock }}</span>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="ajusterRapide(pd, 1)" [disabled]="mouvementEnCours()">
                           <i class="bi bi-plus"></i>
                         </button>
                       </div>
                     </td>
                     <td>
-                      <input type="number" class="form-control form-control-sm" style="width: 80px;" min="0" [ngModel]="pd.seuilAlerte" (ngModelChange)="modifierSeuil(pd.id, $event)">
+                      <input type="number" class="form-control form-control-sm" style="width: 80px;" min="0" [ngModel]="pd.seuilAlerte" (ngModelChange)="modifierSeuil(pd, $event)">
                     </td>
                     <td class="text-end pe-3">
                       <div class="d-flex justify-content-end gap-1">
@@ -173,8 +173,8 @@
               <tbody>
                 @for (mouvement of historique(); track mouvement.id) {
                   <tr>
-                    <td class="ps-3 small">{{ mouvement.date }}</td>
-                    <td>{{ mouvement.produitNom }}</td>
+                    <td class="ps-3 small">{{ mouvement.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                    <td>{{ mouvement.produitDepot.produit.nom }}</td>
                     <td>
                       <span class="badge" [class.bg-success-subtle]="mouvement.type === 'ENTREE'" [class.text-success]="mouvement.type === 'ENTREE'" [class.bg-danger-subtle]="mouvement.type === 'SORTIE'" [class.text-danger]="mouvement.type === 'SORTIE'">
                         {{ mouvement.type === 'ENTREE' ? 'Entrée' : 'Sortie' }}

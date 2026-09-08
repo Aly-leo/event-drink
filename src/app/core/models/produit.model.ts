@@ -24,4 +24,21 @@ export interface ProduitDepot {
   prix: number;
   montantConsigne: number;
   disponible: boolean;
+  quantiteStock: number;
+  seuilAlerte: number;
+}
+
+export enum TypeMouvementStock {
+  ENTREE = 'ENTREE',
+  SORTIE = 'SORTIE',
+}
+
+export interface MouvementStock {
+  id: string;
+  produitDepotId: string;
+  produitDepot: ProduitDepot;
+  type: TypeMouvementStock;
+  quantite: number;
+  motif: string | null;
+  createdAt: string;
 }

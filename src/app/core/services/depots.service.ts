@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Depot, DepotDetail } from '../models/depot.model';
-import { ProduitDepot } from '../models/produit.model';
+import { MouvementStock, ProduitDepot, TypeMouvementStock } from '../models/produit.model';
 
 export interface DepotsSearchParams {
   lat?: number;
@@ -30,9 +30,17 @@ export interface AddProduitDepotPayload {
   prix: number;
   montantConsigne?: number;
   disponible?: boolean;
+  quantiteStock?: number;
+  seuilAlerte?: number;
 }
 
-export type UpdateProduitDepotPayload = Partial<Omit<AddProduitDepotPayload, 'produitId'>>;
+export type UpdateProduitDepotPayload = Partial<Omit<AddProduitDepotPayload, 'produitId' | 'quantiteStock'>>;
+
+export interface CreateMouvementStockPayload {
+  type: TypeMouvementStock;
+  quantite: number;
+  motif?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class DepotsService {
@@ -74,5 +82,19 @@ export class DepotsService {
 
   updateMyProduit(produitDepotId: string, payload: UpdateProduitDepotPayload): Observable<ProduitDepot> {
     return this.http.patch<ProduitDepot>(`${environment.apiUrl}/depots/me/produits/${produitDepotId}`, payload);
+  }
+
+  creerMouvement(
+    produitDepotId: string,
+    payload: CreateMouvementStockPayload
+  ): Observable<{ produitDepot: ProduitDepot; mouvement: MouvementStock }> {
+    return this.http.post<{ produitDepot: ProduitDepot; mouvement: MouvementStock }>(
+      `${environment.apiUrl}/depots/me/produits/${produitDepotId}/mouvements`,
+      payload
+    );
+  }
+
+  getMesMouvements(): Observable<MouvementStock[]> {
+    return this.http.get<MouvementStock[]>(`${environment.apiUrl}/depots/me/mouvements`);
   }
 }

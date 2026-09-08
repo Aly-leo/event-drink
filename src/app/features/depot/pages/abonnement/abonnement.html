@@ -6,6 +6,18 @@
       <p class="text-secondary mb-0">Gérez votre visibilité et vos avantages sur Eventdrink.</p>
     </div>
 
+    @if (loading()) {
+      <div class="text-center text-secondary py-5">
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        Chargement...
+      </div>
+    } @else if (error()) {
+      <div class="alert alert-danger" role="alert">
+        {{ error() }}
+        <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">Réessayer</button>
+      </div>
+    } @else {
+
     @if (statut() !== 'ACTIF') {
       <div class="alert alert-warning d-flex align-items-center gap-3 shadow-sm mb-4">
         <i class="bi bi-exclamation-triangle-fill fs-4"></i>
@@ -97,7 +109,7 @@
             <tbody>
               @for (paiement of historique(); track paiement.id) {
                 <tr>
-                  <td class="ps-3">{{ paiement.date }}</td>
+                  <td class="ps-3">{{ paiement.createdAt | date: 'dd/MM/yyyy' }}</td>
                   <td class="text-secondary small">{{ paiement.reference }}</td>
                   <td>{{ paliers[paiement.palier].label }}</td>
                   <td class="text-end fw-semibold">{{ paiement.montant | number:'1.0-0' }} FCFA</td>
@@ -115,6 +127,8 @@
         </div>
       </div>
     </div>
+
+    }
 
   </div>
 </div>

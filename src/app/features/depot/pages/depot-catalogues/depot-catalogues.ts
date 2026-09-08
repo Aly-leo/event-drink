@@ -1,37 +1,20 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { CatalogueService } from '../../../../core/services/catalogue.service';
 import { DepotsService } from '../../../../core/services/depots.service';
-import { CategorieProduit, Produit, ProduitDepot } from '../../../../core/models/produit.model';
-
-export type TypeMouvement = 'ENTREE' | 'SORTIE';
-
-export interface MouvementStock {
-  id: number;
-  produitId: string;
-  produitNom: string;
-  type: TypeMouvement;
-  quantite: number;
-  motif: string;
-  date: string;
-}
+import { CategorieProduit, MouvementStock, Produit, ProduitDepot, TypeMouvementStock } from '../../../../core/models/produit.model';
 
 interface OptionCategorie {
   valeur: CategorieProduit | 'TOUTES';
   label: string;
 }
 
-export interface ProduitDepotAvecStock extends ProduitDepot {
-  quantiteActuelle: number;
-  seuilAlerte: number;
-}
-
 @Component({
   selector: 'app-depot-catalogues',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DatePipe],
   templateUrl: './depot-catalogues.html',
   styleUrl: './depot-catalogues.scss',
 })
@@ -60,11 +43,8 @@ export class DepotCatalogues {
   afficherUniquementFaibles = signal(false);
 
   catalogueCentral = signal<Produit[]>([]);
-  mesProduits = signal<ProduitDepotAvecStock[]>([]);
-
-  historique = signal<MouvementStock[]>([
-    { id: 1, produitId: '1', produitNom: 'Exemple Bière', type: 'ENTREE', quantite: 20, motif: 'Réapprovisionnement', date: '18/08/2026 14:20' }
-  ]);
+  mesProduits = signal<ProduitDepot[]>([]);
+  historique = signal<MouvementStock[]>([]);
 
   produitsFiltres = computed(() => {
     const terme = this.recherche().trim().toLowerCase();
@@ -77,13 +57,13 @@ export class DepotCatalogues {
         !terme || pd.produit.nom.toLowerCase().includes(terme) || pd.produit.marque.toLowerCase().includes(terme);
       const matchCat = cat === 'TOUTES' ? true : pd.produit.categorie === cat;
       const matchStatut = statut === 'TOUS' ? true : statut === 'DISPONIBLE' ? pd.disponible : !pd.disponible;
-      const matchFaible = !faiblesUniquement || pd.quantiteActuelle <= pd.seuilAlerte;
+      const matchFaible = !faiblesUniquement || pd.quantiteStock <= pd.seuilAlerte;
 
       return matchTerme && matchCat && matchStatut && matchFaible;
     });
   });
 
-  produitsEnAlerte = computed(() => this.mesProduits().filter((pd) => pd.quantiteActuelle <= pd.seuilAlerte));
+  produitsEnAlerte = computed(() => this.mesProduits().filter((pd) => pd.quantiteStock <= pd.seuilAlerte));
 
   produitsDisponiblesAjout = computed(() => {
     const dejaAjoutes = new Set(this.mesProduits().map((pd) => pd.produitId));
@@ -97,9 +77,10 @@ export class DepotCatalogues {
   modeEdition = signal(false);
   submitting = signal(false);
   formError = signal<string | null>(null);
+  mouvementEnCours = signal(false);
 
-  private produitDepotEnEdition: ProduitDepotAvecStock | null = null;
-  produitSelectionneMouvement = signal<ProduitDepotAvecStock | null>(null);
+  private produitDepotEnEdition: ProduitDepot | null = null;
+  produitSelectionneMouvement = signal<ProduitDepot | null>(null);
 
   formulaire = {
     produitId: '',
@@ -111,7 +92,7 @@ export class DepotCatalogues {
     seuilAlerte: 5
   };
 
-  formulaireMouvement = { type: 'ENTREE' as TypeMouvement, quantite: 1, motif: '' };
+  formulaireMouvement = { type: TypeMouvementStock.ENTREE, quantite: 1, motif: '' };
 
   constructor() {
     this.load();
@@ -120,16 +101,15 @@ export class DepotCatalogues {
   load(): void {
     this.loading.set(true);
     this.error.set(null);
-    forkJoin([this.catalogueService.getProduits(), this.depotsService.getMyProduits()]).subscribe({
-      next: ([catalogue, mesProduits]) => {
+    forkJoin([
+      this.catalogueService.getProduits(),
+      this.depotsService.getMyProduits(),
+      this.depotsService.getMesMouvements(),
+    ]).subscribe({
+      next: ([catalogue, mesProduits, mouvements]) => {
         this.catalogueCentral.set(catalogue);
-        this.mesProduits.set(
-          mesProduits.map((p) => ({
-            ...p,
-            quantiteActuelle: (p as { quantiteActuelle?: number }).quantiteActuelle ?? 10,
-            seuilAlerte: (p as { seuilAlerte?: number }).seuilAlerte ?? 5,
-          }))
-        );
+        this.mesProduits.set(mesProduits);
+        this.historique.set(mouvements);
         this.loading.set(false);
       },
       error: () => {
@@ -167,7 +147,7 @@ export class DepotCatalogues {
     this.modalProduitOuverte.set(true);
   }
 
-  ouvrirModification(pd: ProduitDepotAvecStock): void {
+  ouvrirModification(pd: ProduitDepot): void {
     this.modeEdition.set(true);
     this.produitDepotEnEdition = pd;
 
@@ -179,7 +159,7 @@ export class DepotCatalogues {
       estConsignable: estConsignable,
       montantConsigne: pd.montantConsigne,
       disponible: pd.disponible,
-      quantiteInitial: pd.quantiteActuelle,
+      quantiteInitial: pd.quantiteStock,
       seuilAlerte: pd.seuilAlerte,
     };
     this.formError.set(null);
@@ -208,21 +188,11 @@ export class DepotCatalogues {
           prix: this.formulaire.prix,
           montantConsigne: consigneFinale,
           disponible: this.formulaire.disponible,
+          seuilAlerte: this.formulaire.seuilAlerte,
         })
         .subscribe({
           next: (updated) => {
-            this.mesProduits.update((list) =>
-              list.map((p) =>
-                p.id === updated.id
-                  ? {
-                      ...p,
-                      ...updated,
-                      montantConsigne: consigneFinale,
-                      seuilAlerte: this.formulaire.seuilAlerte,
-                    }
-                  : p
-              )
-            );
+            this.mesProduits.update((list) => list.map((p) => (p.id === updated.id ? updated : p)));
             this.submitting.set(false);
             this.fermerModalProduit();
           },
@@ -246,16 +216,12 @@ export class DepotCatalogues {
         prix: this.formulaire.prix,
         montantConsigne: consigneFinale,
         disponible: this.formulaire.disponible,
+        quantiteStock: this.formulaire.quantiteInitial || 0,
+        seuilAlerte: this.formulaire.seuilAlerte || 5,
       })
       .subscribe({
         next: (created) => {
-          const nouveauProduit: ProduitDepotAvecStock = {
-            ...created,
-            montantConsigne: consigneFinale,
-            quantiteActuelle: this.formulaire.quantiteInitial || 0,
-            seuilAlerte: this.formulaire.seuilAlerte || 5,
-          };
-          this.mesProduits.update((list) => [...list, nouveauProduit]);
+          this.mesProduits.update((list) => [...list, created]);
           this.submitting.set(false);
           this.fermerModalProduit();
         },
@@ -266,7 +232,7 @@ export class DepotCatalogues {
       });
   }
 
-  toggleDisponibilite(pd: ProduitDepotAvecStock): void {
+  toggleDisponibilite(pd: ProduitDepot): void {
     this.depotsService.updateMyProduit(pd.id, { disponible: !pd.disponible }).subscribe({
       next: (updated) =>
         this.mesProduits.update((list) =>
@@ -275,21 +241,24 @@ export class DepotCatalogues {
     });
   }
 
-  ajusterRapide(id: string, delta: number): void {
-    this.mesProduits.update((list) =>
-      list.map((p) => (p.id === id ? { ...p, quantiteActuelle: Math.max(0, p.quantiteActuelle + delta) } : p))
-    );
+  ajusterRapide(pd: ProduitDepot, delta: number): void {
+    if (delta < 0 && pd.quantiteStock === 0) return;
+    this.appliquerMouvement(pd, {
+      type: delta > 0 ? TypeMouvementStock.ENTREE : TypeMouvementStock.SORTIE,
+      quantite: 1,
+      motif: 'Ajustement rapide',
+    });
   }
 
-  modifierSeuil(id: string, nouveauSeuil: number): void {
-    this.mesProduits.update((list) =>
-      list.map((p) => (p.id === id ? { ...p, seuilAlerte: Math.max(0, nouveauSeuil) } : p))
-    );
+  modifierSeuil(pd: ProduitDepot, nouveauSeuil: number): void {
+    this.depotsService.updateMyProduit(pd.id, { seuilAlerte: Math.max(0, nouveauSeuil) }).subscribe({
+      next: (updated) => this.mesProduits.update((list) => list.map((p) => (p.id === updated.id ? updated : p))),
+    });
   }
 
-  ouvrirMouvement(produit: ProduitDepotAvecStock): void {
+  ouvrirMouvement(produit: ProduitDepot): void {
     this.produitSelectionneMouvement.set(produit);
-    this.formulaireMouvement = { type: 'ENTREE', quantite: 1, motif: '' };
+    this.formulaireMouvement = { type: TypeMouvementStock.ENTREE, quantite: 1, motif: '' };
     this.modalMouvementOuverte.set(true);
   }
 
@@ -302,36 +271,30 @@ export class DepotCatalogues {
     const produit = this.produitSelectionneMouvement();
     if (!produit || this.formulaireMouvement.quantite <= 0) return;
 
-    const delta =
-      this.formulaireMouvement.type === 'ENTREE'
-        ? this.formulaireMouvement.quantite
-        : -this.formulaireMouvement.quantite;
+    this.appliquerMouvement(produit, {
+      type: this.formulaireMouvement.type,
+      quantite: this.formulaireMouvement.quantite,
+      motif:
+        this.formulaireMouvement.motif ||
+        (this.formulaireMouvement.type === TypeMouvementStock.ENTREE ? 'Réapprovisionnement' : 'Sortie de stock'),
+    });
+  }
 
-    this.mesProduits.update((list) =>
-      list.map((p) => (p.id === produit.id ? { ...p, quantiteActuelle: Math.max(0, p.quantiteActuelle + delta) } : p))
-    );
-
-    this.historique.update((list) => [
-      {
-        id: Math.max(0, ...list.map((m) => m.id)) + 1,
-        produitId: produit.id,
-        produitNom: produit.produit.nom,
-        type: this.formulaireMouvement.type,
-        quantite: this.formulaireMouvement.quantite,
-        motif:
-          this.formulaireMouvement.motif ||
-          (this.formulaireMouvement.type === 'ENTREE' ? 'Réapprovisionnement' : 'Sortie de stock'),
-        date: new Date().toLocaleString('fr-FR', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
+  private appliquerMouvement(
+    pd: ProduitDepot,
+    payload: { type: TypeMouvementStock; quantite: number; motif: string }
+  ): void {
+    this.mouvementEnCours.set(true);
+    this.depotsService.creerMouvement(pd.id, payload).subscribe({
+      next: ({ produitDepot, mouvement }) => {
+        this.mesProduits.update((list) => list.map((p) => (p.id === produitDepot.id ? produitDepot : p)));
+        this.historique.update((list) => [mouvement, ...list]);
+        this.mouvementEnCours.set(false);
+        this.fermerModalMouvement();
       },
-      ...list,
-    ]);
-
-    this.fermerModalMouvement();
+      error: () => {
+        this.mouvementEnCours.set(false);
+      },
+    });
   }
 }

@@ -38,9 +38,9 @@
               <button
                 type="button"
                 class="btn w-100 py-3 d-flex flex-column align-items-center gap-2"
-                [class.btn-outline-secondary ]="operateur() !== 'ORANGE_MONEY'"
-                [class.btn-primary]="operateur() === 'ORANGE_MONEY'"
-                (click)="choisirOperateur('ORANGE_MONEY')"
+                [class.btn-outline-secondary ]="operateur() !== OperateurPaiement.ORANGE_MONEY"
+                [class.btn-primary]="operateur() === OperateurPaiement.ORANGE_MONEY"
+                (click)="choisirOperateur(OperateurPaiement.ORANGE_MONEY)"
               >
                 <i class="bi bi-phone fs-3"></i>
                 <span class="small fw-semibold">Orange Money</span>
@@ -50,9 +50,9 @@
               <button
                 type="button"
                 class="btn w-100 py-3 d-flex flex-column align-items-center gap-2"
-                [class.btn-outline-secondary]="operateur() !== 'MTN_MOMO'"
-                [class.btn-warning]="operateur() === 'MTN_MOMO'"
-                (click)="choisirOperateur('MTN_MOMO')"
+                [class.btn-outline-secondary]="operateur() !== OperateurPaiement.MTN_MOMO"
+                [class.btn-warning]="operateur() === OperateurPaiement.MTN_MOMO"
+                (click)="choisirOperateur(OperateurPaiement.MTN_MOMO)"
               >
                 <i class="bi bi-phone fs-3"></i>
                 <span class="small fw-semibold">MTN MoMo</span>
@@ -121,7 +121,7 @@
             <i class="bi bi-x-lg fs-1"></i>
           </div>
           <h2 class="h5 fw-bold mb-2">Le paiement a échoué</h2>
-          <p class="text-secondary mb-4">Vérifiez votre solde ou réessayez.</p>
+          <p class="text-secondary mb-4">{{ erreur() || 'Vérifiez votre solde ou réessayez.' }}</p>
           <button type="button" class="btn btn-primary rounded-pill px-4" (click)="reessayer()">
             Réessayer
           </button>
