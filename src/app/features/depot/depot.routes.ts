@@ -23,10 +23,6 @@ export const DEPOT_ROUTES: Routes = [
         loadComponent: () => import('./pages/depot-abonnement-paiement/depot-abonnement-paiement').then((m) => m.DepotAbonnementPaiement),
       },
       {
-        path: 'stocks',
-        loadComponent: () => import('./pages/depot-stocks/depot-stocks').then((m) => m.DepotStocks),
-      },
-      {
         path: 'statistiques',
         loadComponent: () => import('./pages/depot-statistiques/depot-statistiques').then((m) => m.DepotStatistiques),
       },

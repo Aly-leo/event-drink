@@ -3,12 +3,6 @@ import { roleGuard } from './core/guards/role.guard';
 import { Role } from './core/models/user.model';
 
 export const routes: Routes = [
-    // Route autonome de dev (hors de tout guard)
-  {
-  path: 'test-abonnement',
-  loadComponent: () =>
-    import('./features/depot/pages/abonnement/abonnement').then((m) => m.Abonnement),
-},
   {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
