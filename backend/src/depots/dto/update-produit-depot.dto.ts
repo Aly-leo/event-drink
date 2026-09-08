@@ -14,4 +14,9 @@ export class UpdateProduitDepotDto {
   @IsOptional()
   @IsBoolean()
   disponible?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  seuilAlerte?: number;
 }

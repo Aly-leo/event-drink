@@ -116,10 +116,11 @@ model Depot {
   visuelUrl       String?
   createdAt       DateTime    @default(now())
 
-  produits  ProduitDepot[]
-  commandes Commande[]
-  plaintes  Plainte[]
-  avis      Avis[]
+  produits   ProduitDepot[]
+  commandes  Commande[]
+  plaintes   Plainte[]
+  avis       Avis[]
+  abonnement Abonnement?
 
   @@map("depots")
 }
@@ -148,12 +149,33 @@ model ProduitDepot {
   prix            Int
   montantConsigne Int      @default(0)
   disponible      Boolean  @default(true)
+  quantiteStock   Int      @default(0)
+  seuilAlerte     Int      @default(5)
   createdAt       DateTime @default(now())
 
   lignesCommande LigneCommande[]
+  mouvements     MouvementStock[]
 
   @@unique([depotId, produitId])
   @@map("produits_depot")
+}
+
+enum TypeMouvementStock {
+  ENTREE
+  SORTIE
+}
+
+model MouvementStock {
+  id             String             @id @default(cuid())
+  produitDepotId String
+  produitDepot   ProduitDepot       @relation(fields: [produitDepotId], references: [id])
+  type           TypeMouvementStock
+  quantite       Int
+  motif          String?
+  createdAt      DateTime           @default(now())
+
+  @@index([produitDepotId])
+  @@map("mouvements_stock")
 }
 
 model Commande {
@@ -233,4 +255,55 @@ model Avis {
   createdAt   DateTime @default(now())
 
   @@map("avis")
+}
+
+enum PalierAbonnement {
+  STANDARD
+  PREMIUM
+}
+
+enum StatutAbonnement {
+  ACTIF
+  EXPIRE
+  EN_ATTENTE_PAIEMENT
+}
+
+enum StatutPaiement {
+  REUSSI
+  ECHOUE
+}
+
+enum OperateurPaiement {
+  ORANGE_MONEY
+  MTN_MOMO
+}
+
+model Abonnement {
+  id                 String           @id @default(cuid())
+  depotId            String           @unique
+  depot              Depot            @relation(fields: [depotId], references: [id])
+  palier             PalierAbonnement @default(STANDARD)
+  statut             StatutAbonnement @default(EN_ATTENTE_PAIEMENT)
+  dateRenouvellement DateTime?
+  createdAt          DateTime         @default(now())
+
+  paiements PaiementAbonnement[]
+
+  @@map("abonnements")
+}
+
+model PaiementAbonnement {
+  id              String            @id @default(cuid())
+  abonnementId    String
+  abonnement      Abonnement        @relation(fields: [abonnementId], references: [id])
+  palier          PalierAbonnement
+  montant         Int
+  operateur       OperateurPaiement
+  numeroTelephone String
+  statut          StatutPaiement
+  reference       String            @unique
+  createdAt       DateTime          @default(now())
+
+  @@index([abonnementId])
+  @@map("paiements_abonnement")
 }

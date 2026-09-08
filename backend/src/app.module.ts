@@ -8,6 +8,7 @@ import { AdminModule } from './admin/admin.module';
 import { PlaintesModule } from './plaintes/plaintes.module';
 import { CommandesModule } from './commandes/commandes.module';
 import { AvisModule } from './avis/avis.module';
+import { AbonnementModule } from './abonnement/abonnement.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AvisModule } from './avis/avis.module';
     PlaintesModule,
     CommandesModule,
     AvisModule,
+    AbonnementModule,
   ],
 })
 export class AppModule {}

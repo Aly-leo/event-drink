@@ -18,7 +18,6 @@ export const routes: Routes = [
   loadChildren: () =>
     import('./features/depot/depot.routes').then((m) => m.DEPOT_ROUTES),
   },
-
   {
     path: 'admin',
     canActivate: [roleGuard(Role.ADMIN)],

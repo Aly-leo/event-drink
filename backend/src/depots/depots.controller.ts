@@ -6,6 +6,8 @@ import { AddProduitDepotDto } from './dto/add-produit-depot.dto';
 import { UpdateProduitDepotDto } from './dto/update-produit-depot.dto';
 import { CreateMyDepotDto } from './dto/create-my-depot.dto';
 import { UpdateMyDepotDto } from './dto/update-my-depot.dto';
+import { CreateMouvementStockDto } from './dto/create-mouvement-stock.dto';
+import { StatistiquesQueryDto } from './dto/statistiques-query.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -61,6 +63,31 @@ export class DepotsController {
     @Body() dto: UpdateProduitDepotDto
   ) {
     return this.depotsService.updateMyProduit(user.sub, produitDepotId, dto);
+  }
+
+  @Post('me/produits/:produitDepotId/mouvements')
+  @UseGuards(RolesGuard)
+  @Roles(Role.DEPOT)
+  creerMouvement(
+    @CurrentUser() user: JwtPayload,
+    @Param('produitDepotId') produitDepotId: string,
+    @Body() dto: CreateMouvementStockDto
+  ) {
+    return this.depotsService.creerMouvement(user.sub, produitDepotId, dto);
+  }
+
+  @Get('me/mouvements')
+  @UseGuards(RolesGuard)
+  @Roles(Role.DEPOT)
+  getMesMouvements(@CurrentUser() user: JwtPayload) {
+    return this.depotsService.findMesMouvements(user.sub);
+  }
+
+  @Get('me/statistiques')
+  @UseGuards(RolesGuard)
+  @Roles(Role.DEPOT)
+  getMesStatistiques(@CurrentUser() user: JwtPayload, @Query() query: StatistiquesQueryDto) {
+    return this.depotsService.getStatistiques(user.sub, query);
   }
 
   @Get()

@@ -16,4 +16,14 @@ export class AddProduitDepotDto {
   @IsOptional()
   @IsBoolean()
   disponible?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  quantiteStock?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  seuilAlerte?: number;
 }

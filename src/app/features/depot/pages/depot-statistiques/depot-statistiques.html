@@ -1,0 +1,174 @@
+<div class="container-fluid p-3 p-md-4">
+
+  <!-- En-tête + Sélecteur de Période -->
+  <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+    <div>
+      <a routerLink="/depot/dashboard" class="btn btn-outline-primary btn-sm align-items-center gap-2 mb-4">
+        <i class="bi bi-arrow-left"></i> Retour au tableau de bord
+      </a>
+      <h1 class="h3 fw-bold mb-1">Statistiques du Dépôt</h1>
+      <p class="text-secondary small mb-0">Suivez l'évolution de vos ventes et vos produits les plus populaires.</p>
+    </div>
+
+    <!-- Filtres de période -->
+    <div class="btn-group" role="group">
+      @for (periode of periodesDisponibles; track periode.jours) {
+        <button
+          type="button"
+          class="btn btn-sm"
+          [class.btn-primary]="periodeSelectionnee().jours === periode.jours"
+          [class.btn-outline-primary]="periodeSelectionnee().jours !== periode.jours"
+          (click)="selectionnerPeriode(periode)"
+        >
+          {{ periode.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="text-center text-secondary py-5">
+      <span class="spinner-border spinner-border-sm me-2"></span>
+      Chargement des statistiques...
+    </div>
+  } @else if (error()) {
+    <div class="alert alert-danger" role="alert">
+      {{ error() }}
+      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="load()">Réessayer</button>
+    </div>
+  } @else {
+
+  <!-- Cartes KPI (Résume) -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body p-3">
+          <span class="text-secondary small fw-semibold">Chiffre d'affaires</span>
+          <div class="h4 fw-bold my-1 text-primary">{{ kpis().chiffreAffairesTotal | number:'1.0-0' }} FCFA</div>
+          <span class="badge" [class.bg-success-subtle]="kpis().croissance >= 0" [class.text-success]="kpis().croissance >= 0" [class.bg-danger-subtle]="kpis().croissance < 0" [class.text-danger]="kpis().croissance < 0">
+            <i class="bi" [class.bi-arrow-up]="kpis().croissance >= 0" [class.bi-arrow-down]="kpis().croissance < 0"></i> {{ kpis().croissance >= 0 ? '+' : '' }}{{ kpis().croissance }}%
+          </span>
+          <span class="text-secondary small d-block mt-1">vs période précédente</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body p-3">
+          <span class="text-secondary small fw-semibold">Commandes totales</span>
+          <div class="h4 fw-bold my-1">{{ kpis().commandesTotal }}</div>
+          <span class="text-secondary small">Sur la période</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body p-3">
+          <span class="text-secondary small fw-semibold">Panier moyen</span>
+          <div class="h4 fw-bold my-1">{{ kpis().panierMoyen | number:'1.0-0' }} FCFA</div>
+          <span class="text-secondary small">Par commande</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body p-3">
+          <span class="text-secondary small fw-semibold">Top Vente</span>
+          @if (produitLePlusVendu(); as top) {
+            <div class="h6 fw-bold my-1 text-truncate" [title]="top.nom">{{ top.nom }}</div>
+            <span class="text-secondary small">{{ top.quantiteVendue }} unités vendues</span>
+          } @else {
+            <div class="h6 fw-bold my-1 text-secondary">—</div>
+            <span class="text-secondary small">Aucune vente sur la période</span>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section Graphiques principaux -->
+  <div class="row g-4 mb-4">
+    
+    <!-- Evolution du Chiffre d'Affaires -->
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h6 fw-bold mb-0">Évolution du Chiffre d'Affaires</h2>
+            <span class="badge bg-light text-dark">{{ periodeSelectionnee().label }}</span>
+          </div>
+          <div style="height: 300px;">
+            <canvas #graphiqueEvolution></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Répartition par Catégorie -->
+    <div class="col-12 col-lg-4">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body p-4">
+          <h2 class="h6 fw-bold mb-3">Répartition par Catégories</h2>
+          <div style="height: 300px;" class="d-flex align-items-center justify-content-center">
+            <canvas #graphiqueCategories></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Section Top Produits (Graphique + Tableau) -->
+  <div class="row g-4">
+    
+    <!-- Graphique à barres Top Produits -->
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body p-4">
+          <h2 class="h6 fw-bold mb-3">Classement des Ventes (Quantités)</h2>
+          <div style="height: 320px;">
+            <canvas #graphiqueTopProduits></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tableau détaillé du Top 5 -->
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body p-4">
+          <h2 class="h6 fw-bold mb-3">Détail des Meilleurs Produits</h2>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Produit</th>
+                  <th class="text-center">Qté Vendue</th>
+                  <th class="text-end">CA Généré</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (produit of topProduits(); track produit.nom) {
+                  <tr>
+                    <td class="fw-semibold">{{ produit.nom }}</td>
+                    <td class="text-center">
+                      <span class="badge bg-secondary-subtle text-dark">{{ produit.quantiteVendue }}</span>
+                    </td>
+                    <td class="text-end fw-bold">{{ produit.chiffreAffaires | number:'1.0-0' }} FCFA</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  }
+
+</div>

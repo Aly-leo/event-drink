@@ -1,4 +1,4 @@
-<div class="d-flex" style="min-height: 100vh;">
+<div class="d-flex" style="min-height: 100vh">
 
   <!-- Sidebar (desktop) -->
   <aside class="ed-glass d-none d-md-flex flex-column border-end shadow-sm"
@@ -56,15 +56,26 @@
     <header class="ed-glass d-flex justify-content-between align-items-center px-3 px-md-4 border-bottom sticky-top" style="height: 64px; top: 0; z-index: 30;">
       <h1 class="h5 fw-bold text-primary mb-0 d-md-none">Eventdrink</h1>
       <span class="d-none d-md-block"></span>
-      <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-sm btn-light rounded-circle"><i class="bi bi-question-circle"></i></button>
-        <button class="btn btn-sm btn-light rounded-circle position-relative">
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-sm btn-light rounded-circle" type="button"><i class="bi bi-question-circle"></i></button>
+        <button class="btn btn-sm btn-light rounded-circle position-relative" type="button">
           <i class="bi bi-bell"></i>
-          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">&nbsp;</span>
         </button>
-        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center d-md-none" style="width: 32px; height: 32px;">
-          <i class="bi bi-person-fill"></i>
-        </div>
+        
+        <!-- Bouton profil mobile cliquable avec redirection vers /depot/compte -->
+        <a 
+          routerLink="/depot/compte"
+          routerLinkActive="border border-2 border-primary"
+          class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center text-decoration-none d-md-none" 
+          style="width: 32px; height: 32px;"
+          [title]="authService.currentUser()?.nom || 'Mon compte'"
+        >
+          @if (authService.currentUser()?.nom) {
+            <span class="fw-bold style-initial">{{ authService.currentUser()?.nom?.charAt(0)?.toUpperCase() }}</span>
+          } @else {
+            <i class="bi bi-person-fill"></i>
+          }
+        </a>
       </div>
     </header>
 
