@@ -1,7 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { CatalogueService } from '../../../../core/services/catalogue.service';
 import { DepotsService } from '../../../../core/services/depots.service';
@@ -32,7 +31,7 @@ export interface ProduitDepotAvecStock extends ProduitDepot {
 @Component({
   selector: 'app-depot-catalogues',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './depot-catalogues.html',
   styleUrl: './depot-catalogues.scss',
 })
