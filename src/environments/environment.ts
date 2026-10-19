@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://event-drink-production.up.railway.app',
+  apiUrl: 'https://event-drink-3b4e.vercel.app',
 };
