@@ -1,4 +1,4 @@
-# 🍺 Eventdrink
+# Eventdrink
 
 **La plateforme qui livre les boissons de vos événements.**
 
@@ -8,15 +8,15 @@ Projet réalisé dans le cadre de l'**Angular Talent Lab 2026** (sprint de 5 jou
 
 | | |
 |---|---|
-| 🌐 **Application** | https://event-drink-iota.vercel.app |
-| 🔌 **API** | https://event-drink-3b4e.vercel.app |
-| 📄 **Contrat d'API** | [API_CONTRACT.md](API_CONTRACT.md) |
+|  **Application** | https://event-drink-iota.vercel.app |
+|  **API** | https://event-drink-3b4e.vercel.app |
+|  **Contrat d'API** | [API_CONTRACT.md](API_CONTRACT.md) |
 
 ![Fiche d'un dépôt : catalogue, consignes et panier](docs/captures/fiche-depot.webp)
 
 ---
 
-## 📑 Sommaire
+## Sommaire
 
 1. [Fonctionnalités](#-fonctionnalités)
 2. [Stack technique](#-stack-technique)
@@ -30,11 +30,11 @@ Projet réalisé dans le cadre de l'**Angular Talent Lab 2026** (sprint de 5 jou
 
 ---
 
-## ✨ Fonctionnalités
+## Fonctionnalités
 
 L'application propose trois espaces selon le rôle de l'utilisateur.
 
-### 👤 Espace Client
+### Espace Client
 
 - **Compte** : inscription, connexion, mot de passe oublié par email, modification du profil.
 - **Explorateur de dépôts** : carte OpenStreetMap, géolocalisation, rayon de recherche, filtre « livraison disponible », distance et note moyenne.
@@ -44,7 +44,7 @@ L'application propose trois espaces selon le rôle de l'utilisateur.
 - **Consignes** : suivi des casiers et bouteilles consignés et du montant bloqué.
 - **Avis** : notation de 1 à 5 étoiles après livraison.
 
-### 🏪 Espace Dépôt
+### Espace Dépôt
 
 - **Inscription puis onboarding** du dépôt, avec validation par l'administrateur.
 - **Tableau de bord** : commandes du jour, en attente, volume par période.
@@ -54,21 +54,21 @@ L'application propose trois espaces selon le rôle de l'utilisateur.
 - **Abonnement** : paliers Standard (5 000 FCFA) et Premium (10 000 FCFA), paiement Mobile Money, historique.
 - **Consignes, paramètres et compte** du dépôt.
 
-### 🛡️ Espace Administrateur
+### Espace Administrateur
 
 - **Tableau de bord** global : dépôts actifs, en attente, chiffre d'affaires, plaintes.
 - **Validation ou blocage des dépôts**.
 - **Catalogue central** des produits (création et modification).
 - **Registre des plaintes** : consultation, résolution, actions.
 
-### 📱 Transversal
+### Transversal
 
 - **Mobile-first** : interface pensée pour le téléphone (barre d'onglets en bas, cartes empilées à la place des tableaux), vérifiée aussi sur ordinateur.
 - Navigation instantanée (préchargement des routes) et interface avec effets verre et dégradés aux couleurs de la marque.
 
 ---
 
-## 🧰 Stack technique
+## Stack technique
 
 | Couche | Technologies |
 |---|---|
@@ -82,7 +82,7 @@ L'application propose trois espaces selon le rôle de l'utilisateur.
 
 ---
 
-## 🗂️ Architecture du projet
+## Architecture du projet
 
 Le dépôt contient le front-end à la racine et le back-end dans `backend/`.
 
@@ -116,7 +116,7 @@ event-drink/
 
 ---
 
-## 🚀 Installation en local
+## Installation en local
 
 ### Prérequis
 
@@ -188,21 +188,7 @@ npm start
 
 ---
 
-## 🔑 Comptes de test
-
-Mot de passe commun : `Password123!`
-
-| Rôle | Email |
-|---|---|
-| Administrateur | `admin@eventdrink.test` |
-| Client | `client@eventdrink.test` |
-| Dépôt (validé) | `depot1@eventdrink.test` |
-| Dépôt (validé) | `depot2@eventdrink.test` |
-| Dépôt (en attente de validation) | `depot3@eventdrink.test` |
-
----
-
-## 🔒 Sécurité
+## Sécurité
 
 - **Rôles appliqués côté serveur** : chaque route est protégée par un guard JWT et un guard de rôle, pas seulement masquée dans l'interface.
 - **Cloisonnement des données** : un dépôt n'accède jamais aux données d'un autre dépôt. Les ressources « du dépôt connecté » sont résolues à partir du jeton, jamais d'un identifiant envoyé par le navigateur. Une ressource non autorisée répond `404` plutôt que `403`.
@@ -212,7 +198,7 @@ Mot de passe commun : `Password123!`
 
 ---
 
-## ☁️ Déploiement
+## Déploiement
 
 Le front et le back-end sont déployés sur **Vercel**, dans deux projets distincts pointant sur le même dépôt GitHub.
 
@@ -227,7 +213,7 @@ Le front et le back-end sont déployés sur **Vercel**, dans deux projets distin
 
 ---
 
-## 👥 Organisation du travail
+## Organisation du travail
 
 - **Alyssa Nkolo** (cheffe d'équipe) : architecture, API NestJS, schéma Prisma, authentification, espace administrateur, espace client, intégration et déploiement.
 - **Nadia** : espace dépôt (interface, abonnement, statistiques, gestion de stock).
@@ -241,7 +227,7 @@ Méthode de travail :
 
 ---
 
-## 🧭 Limites connues et perspectives
+## Limites connues et perspectives
 
 **Limites actuelles**
 
@@ -260,6 +246,6 @@ Méthode de travail :
 
 ---
 
-## 📄 Licence
+## Licence
 
 Projet pédagogique réalisé dans le cadre de l'Angular Talent Lab 2026.
