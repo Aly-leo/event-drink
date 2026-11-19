@@ -1,0 +1,46 @@
+// Page d'accueil — réutilise les tokens du thème global (src/styles.scss).
+
+.home-header {
+  border-bottom: 1px solid var(--ed-border);
+  z-index: 1030;
+}
+
+.home-hero-frame {
+  overflow: hidden;
+}
+
+// Pastille d'icône, même dégradé que les boutons principaux.
+.home-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--ed-radius-card);
+  background: var(--ed-gradient-primary);
+  color: #fff;
+  font-size: 1.25rem;
+
+  &--soft {
+    background: rgba(163, 57, 0, 0.1);
+    color: var(--ed-primary);
+  }
+}
+
+.home-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ed-gradient-primary);
+  color: #fff;
+  font-weight: 700;
+}
+
+.home-cta {
+  border-radius: var(--ed-radius-card);
+  background: var(--ed-gradient-primary);
+  box-shadow: 0 12px 30px -12px rgba(163, 57, 0, 0.45);
+}

@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, StatutCommande, StatutDepot, TypeMouvementStock } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { DepotsQueryDto } from './dto/depots-query.dto';
@@ -103,6 +103,7 @@ export class DepotsService {
     if (existing) {
       throw new ConflictException('Vous avez déjà un dépôt enregistré.');
     }
+    this.exigerAuMoinsUnMode(dto.modeLivraison ?? false, dto.modeRetrait ?? true);
     return this.prisma.depot.create({
       data: {
         ownerId,
@@ -120,7 +121,18 @@ export class DepotsService {
 
   async updateMyDepot(ownerId: string, dto: UpdateMyDepotDto) {
     const depot = await this.requireMyDepot(ownerId);
+    this.exigerAuMoinsUnMode(
+      dto.modeLivraison ?? depot.modeLivraison,
+      dto.modeRetrait ?? depot.modeRetrait
+    );
     return this.prisma.depot.update({ where: { id: depot.id }, data: dto });
+  }
+
+  /** Regle d'integrite (aussi garantie en base) : un depot propose au moins livraison ou retrait. */
+  private exigerAuMoinsUnMode(modeLivraison: boolean, modeRetrait: boolean): void {
+    if (!modeLivraison && !modeRetrait) {
+      throw new BadRequestException('Un dépôt doit proposer au moins la livraison ou le retrait.');
+    }
   }
 
   async findMyProduits(ownerId: string) {

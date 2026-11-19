@@ -18,15 +18,14 @@ Projet réalisé dans le cadre de l'**Angular Talent Lab 2026** (sprint de 5 jou
 
 ## Sommaire
 
-1. [Fonctionnalités](#-fonctionnalités)
-2. [Stack technique](#-stack-technique)
-3. [Architecture du projet](#-architecture-du-projet)
-4. [Installation en local](#-installation-en-local)
-5. [Comptes de test](#-comptes-de-test)
-6. [Sécurité](#-sécurité)
-7. [Déploiement](#-déploiement)
-8. [Organisation du travail](#-organisation-du-travail)
-9. [Limites connues et perspectives](#-limites-connues-et-perspectives)
+1. [Fonctionnalités](#fonctionnalités)
+2. [Stack technique](#stack-technique)
+3. [Architecture du projet](#architecture-du-projet)
+4. [Installation en local](#installation-en-local)
+5. [Sécurité](#sécurité)
+6. [Déploiement](#déploiement)
+7. [Organisation du travail](#organisation-du-travail)
+8. [Limites connues et perspectives](#limites-connues-et-perspectives)
 
 ---
 
@@ -63,6 +62,7 @@ L'application propose trois espaces selon le rôle de l'utilisateur.
 
 ### Transversal
 
+- **Page d'accueil** de présentation du projet, affichée avant la connexion ou l'inscription.
 - **Mobile-first** : interface pensée pour le téléphone (barre d'onglets en bas, cartes empilées à la place des tableaux), vérifiée aussi sur ordinateur.
 - Navigation instantanée (préchargement des routes) et interface avec effets verre et dégradés aux couleurs de la marque.
 
@@ -195,6 +195,8 @@ npm start
 - **Montants calculés par le serveur** : prix, consignes, frais de livraison, total des commandes et prix des abonnements sont recalculés côté serveur.
 - **Mots de passe** : hachés avec bcrypt. La réinitialisation utilise un lien à usage unique qui expire au bout d'une heure, dont seul le hash est stocké. La réponse est identique que l'email existe ou non, pour empêcher l'énumération des comptes.
 - **CORS** restreint au front déployé et à ses déploiements de prévisualisation.
+- **Intégrité garantie par la base de données** : en plus des validations de l'API, des contraintes `CHECK` et des triggers PostgreSQL (migration `contraintes_ocl`) refusent toute donnée incohérente, même écrite en dehors de l'application : stock, prix et consignes non négatifs, quantités de commande strictement positives, format des références `FAC-AAAA-NNNN` et `PAY-AAAA-NNNN`, statut de commande cohérent avec le mode (retrait ou livraison), note d'avis de 1 à 5, avis rattaché au dépôt de la commande, montant de consigne égal à consigne unitaire × quantité, montant d'abonnement conforme au palier, numéro de téléphone camerounais valide, dépôt proposant au moins la livraison ou le retrait, coordonnées GPS valides.
+- **Suppressions en cascade** : supprimer une commande, un dépôt ou un compte retire proprement ses données dépendantes (lignes, consignes, produits, mouvements de stock, abonnement, jetons de réinitialisation). Des index accélèrent les recherches de commandes et de dépôts par statut.
 
 ---
 

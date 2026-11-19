@@ -91,7 +91,7 @@ model User {
 model PasswordResetToken {
   id        String    @id @default(cuid())
   userId    String
-  user      User      @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   tokenHash String    @unique
   expiresAt DateTime
   usedAt    DateTime?
@@ -123,6 +123,7 @@ model Depot {
   avis       Avis[]
   abonnement Abonnement?
 
+  @@index([statut])
   @@map("depots")
 }
 
@@ -144,7 +145,7 @@ model Produit {
 model ProduitDepot {
   id              String   @id @default(cuid())
   depotId         String
-  depot           Depot    @relation(fields: [depotId], references: [id])
+  depot           Depot    @relation(fields: [depotId], references: [id], onDelete: Cascade)
   produitId       String
   produit         Produit  @relation(fields: [produitId], references: [id])
   prix            Int
@@ -169,7 +170,7 @@ enum TypeMouvementStock {
 model MouvementStock {
   id             String             @id @default(cuid())
   produitDepotId String
-  produitDepot   ProduitDepot       @relation(fields: [produitDepotId], references: [id])
+  produitDepot   ProduitDepot       @relation(fields: [produitDepotId], references: [id], onDelete: Cascade)
   type           TypeMouvementStock
   quantite       Int
   motif          String?
@@ -197,13 +198,15 @@ model Commande {
   lignes LigneCommande[]
   avis   Avis?
 
+  @@index([clientId])
+  @@index([depotId, statut])
   @@map("commandes")
 }
 
 model LigneCommande {
   id                      String       @id @default(cuid())
   commandeId              String
-  commande                Commande     @relation(fields: [commandeId], references: [id])
+  commande                Commande     @relation(fields: [commandeId], references: [id], onDelete: Cascade)
   produitDepotId          String
   produitDepot            ProduitDepot @relation(fields: [produitDepotId], references: [id])
   quantite                Int
@@ -212,13 +215,14 @@ model LigneCommande {
 
   consigne Consigne?
 
+  @@index([commandeId])
   @@map("lignes_commande")
 }
 
 model Consigne {
   id              String          @id @default(cuid())
   ligneCommandeId String          @unique
-  ligneCommande   LigneCommande   @relation(fields: [ligneCommandeId], references: [id])
+  ligneCommande   LigneCommande   @relation(fields: [ligneCommandeId], references: [id], onDelete: Cascade)
   montant         Int
   statut          StatutConsigne  @default(BLOQUEE)
   createdAt       DateTime        @default(now())
@@ -240,6 +244,7 @@ model Plainte {
   actionAdmin       ActionAdminPlainte?
   createdAt         DateTime            @default(now())
 
+  @@index([depotId, statut])
   @@map("plaintes")
 }
 
@@ -255,6 +260,7 @@ model Avis {
   commentaire String?
   createdAt   DateTime @default(now())
 
+  @@index([depotId])
   @@map("avis")
 }
 
@@ -282,7 +288,7 @@ enum OperateurPaiement {
 model Abonnement {
   id                 String           @id @default(cuid())
   depotId            String           @unique
-  depot              Depot            @relation(fields: [depotId], references: [id])
+  depot              Depot            @relation(fields: [depotId], references: [id], onDelete: Cascade)
   palier             PalierAbonnement @default(STANDARD)
   statut             StatutAbonnement @default(EN_ATTENTE_PAIEMENT)
   dateRenouvellement DateTime?
@@ -296,7 +302,7 @@ model Abonnement {
 model PaiementAbonnement {
   id              String            @id @default(cuid())
   abonnementId    String
-  abonnement      Abonnement        @relation(fields: [abonnementId], references: [id])
+  abonnement      Abonnement        @relation(fields: [abonnementId], references: [id], onDelete: Cascade)
   palier          PalierAbonnement
   montant         Int
   operateur       OperateurPaiement

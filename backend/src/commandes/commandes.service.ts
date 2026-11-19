@@ -81,6 +81,8 @@ export class CommandesService {
 
     for (let attempt = 0; attempt < 5; attempt++) {
       try {
+        // Delais elargis (defaut Prisma : 5 s) : la base serverless peut etre lente juste
+        // apres un reveil, ce qui faisait echouer la commande (erreur P2028).
         const commande = await this.prisma.$transaction(async (tx) => {
           const created = await tx.commande.create({
             data: {
@@ -109,7 +111,7 @@ export class CommandesService {
           }
 
           return created;
-        });
+        }, { maxWait: 10000, timeout: 20000 });
 
         return this.findByIdRaw(commande.id);
       } catch (e) {
