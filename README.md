@@ -209,6 +209,8 @@ Mot de passe commun : `Password123!`
 - **Montants calculés par le serveur** : prix, consignes, frais de livraison, total des commandes et prix des abonnements sont recalculés côté serveur.
 - **Mots de passe** : hachés avec bcrypt. La réinitialisation utilise un lien à usage unique qui expire au bout d'une heure, dont seul le hash est stocké. La réponse est identique que l'email existe ou non, pour empêcher l'énumération des comptes.
 - **CORS** restreint au front déployé et à ses déploiements de prévisualisation.
+- **Intégrité garantie par la base de données** : en plus des validations de l'API, des contraintes `CHECK` et des triggers PostgreSQL (migration `contraintes_ocl`) refusent toute donnée incohérente, même écrite en dehors de l'application : stock, prix et consignes non négatifs, quantités de commande strictement positives, format des références `FAC-AAAA-NNNN` et `PAY-AAAA-NNNN`, statut de commande cohérent avec le mode (retrait ou livraison), note d'avis de 1 à 5, avis rattaché au dépôt de la commande, montant de consigne égal à consigne unitaire × quantité, montant d'abonnement conforme au palier, numéro de téléphone camerounais valide, dépôt proposant au moins la livraison ou le retrait, coordonnées GPS valides.
+- **Suppressions en cascade** : supprimer une commande, un dépôt ou un compte retire proprement ses données dépendantes (lignes, consignes, produits, mouvements de stock, abonnement, jetons de réinitialisation). Des index accélèrent les recherches de commandes et de dépôts par statut.
 
 ---
 
