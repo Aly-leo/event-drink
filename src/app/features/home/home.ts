@@ -1,7 +1,5 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
-import { Role } from '../../core/models/user.model';
 
 interface Fonctionnalite {
   icone: string;
@@ -22,24 +20,6 @@ interface Etape {
   styleUrl: './home.scss',
 })
 export class Home {
-  private readonly authService = inject(AuthService);
-
-  /** Espace de l'utilisateur déjà connecté, pour lui éviter de repasser par la connexion. */
-  readonly espaceUrl = computed(() => {
-    if (!this.authService.isLoggedIn()) {
-      return null;
-    }
-    const routeParRole: Record<Role, string> = {
-      [Role.CLIENT]: '/client',
-      [Role.DEPOT]: '/depot',
-      [Role.ADMIN]: '/admin',
-    };
-    const role = this.authService.currentUser()?.role;
-    return role ? routeParRole[role] : null;
-  });
-
-  readonly annee = new Date().getFullYear();
-
   readonly fonctionnalites: Fonctionnalite[] = [
     {
       icone: 'bi-geo-alt',
